@@ -1,40 +1,35 @@
-// src/vehicles/vehicles.resolver.ts
+import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import { VehiclesService } from './vehicles.service';
+import { Vehicle, GpsPosition } from '../entities/vehicle.entity';
+import { AddVehicleInput } from './dto/add-vehicle.input';
+import { RecordPositionInput } from './dto/record-position.input';
+
 @Resolver(() => Vehicle)
 export class VehiclesResolver {
   constructor(private readonly vehiclesService: VehiclesService) {}
 
   @Mutation(() => Vehicle)
-  @UseGuards(GqlAuthGuard)
-  createVehicle(@Args('input') input: CreateVehicleInput): Promise<Vehicle> {
-    return this.vehiclesService.create(input);
+  addVehicle(@Args('input') input: AddVehicleInput) {
+    return this.vehiclesService.addVehicle(input);
   }
 
   @Query(() => [Vehicle])
-  @UseGuards(GqlAuthGuard)
-  vehicles(): Promise<Vehicle[]> {
-    return this.vehiclesService.findAll();
+  vehicles() {
+    return this.vehiclesService.vehicles();
   }
 
   @Query(() => Vehicle)
-  @UseGuards(GqlAuthGuard)
-  vehicle(@Args('id') id: string): Promise<Vehicle> {
-    return this.vehiclesService.findOne(id);
+  vehicle(@Args('id') id: string) {
+    return this.vehiclesService.vehicle(id);
   }
 
   @Mutation(() => GpsPosition)
-  @UseGuards(GqlAuthGuard)
-  recordPosition(
-    @Args('vehicleId') vehicleId: string,
-    @Args('lat') lat: number,
-    @Args('lng') lng: number,
-    @Args('speed', { nullable: true }) speed?: number,
-  ): Promise<GpsPosition> {
-    return this.vehiclesService.recordPosition(vehicleId, lat, lng, speed);
+  recordPosition(@Args('input') input: RecordPositionInput) {
+    return this.vehiclesService.recordPosition(input);
   }
 
   @Query(() => [GpsPosition])
-  @UseGuards(GqlAuthGuard)
-  vehicleHistory(@Args('vehicleId') vehicleId: string): Promise<GpsPosition[]> {
-    return this.vehiclesService.getHistory(vehicleId);
+  vehicleHistory(@Args('vehicleId') vehicleId: string) {
+    return this.vehiclesService.vehicleHistory(vehicleId);
   }
 }
