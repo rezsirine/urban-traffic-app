@@ -1,0 +1,108 @@
+# docker-compose.yml
+version: "3.9"
+
+services:
+  # Bases de données
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      {
+        POSTGRES_DB: auth_db,
+        POSTGRES_USER: postgres,
+        POSTGRES_PASSWORD: postgres,
+      }
+    volumes: [auth-data:/var/lib/postgresql/data]
+
+  vehicles-db:
+    image: postgres:15-alpine
+    environment:
+      {
+        POSTGRES_DB: vehicles_db,
+        POSTGRES_USER: postgres,
+        POSTGRES_PASSWORD: postgres,
+      }
+    volumes: [vehicles-data:/var/lib/postgresql/data]
+
+  traffic-db:
+    image: postgres:15-alpine
+    environment:
+      {
+        POSTGRES_DB: traffic_db,
+        POSTGRES_USER: postgres,
+        POSTGRES_PASSWORD: postgres,
+      }
+
+  incidents-db:
+    image: postgres:15-alpine
+    environment:
+      {
+        POSTGRES_DB: incidents_db,
+        POSTGRES_USER: postgres,
+        POSTGRES_PASSWORD: postgres,
+      }
+
+  notifs-db:
+    image: postgres:15-alpine
+    environment:
+      {
+        POSTGRES_DB: notifs_db,
+        POSTGRES_USER: postgres,
+        POSTGRES_PASSWORD: postgres,
+      }
+
+  # Microservices
+  auth-service:
+    build: ./apps/auth-service
+    env_file: ./apps/auth-service/.env
+    depends_on: [auth-db]
+    ports: ["3001:3001"]
+
+  vehicle-service:
+    build: ./apps/vehicle-service
+    env_file: ./apps/vehicle-service/.env
+    depends_on: [vehicles-db]
+    ports: ["3002:3002"]
+
+  traffic-service:
+    build: ./apps/traffic-service
+    depends_on: [traffic-db]
+    ports: ["3003:3003"]
+
+  incident-service:
+    build: ./apps/incident-service
+    depends_on: [incidents-db]
+    ports: ["3004:3004"]
+
+  notif-service:
+    build: ./apps/notif-service
+    depends_on: [notifs-db]
+    ports: ["3005:3005"]
+
+  # Gateway
+  gateway:
+    build: ./apps/gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:3001/graphql
+      VEHICLE_SERVICE_URL: http://vehicle-service:3002/graphql
+      TRAFFIC_SERVICE_URL: http://traffic-service:3003/graphql
+      INCIDENT_SERVICE_URL: http://incident-service:3004/graphql
+      NOTIF_SERVICE_URL: http://notif-service:3005/graphql
+    depends_on:
+      [
+        auth-service,
+        vehicle-service,
+        traffic-service,
+        incident-service,
+        notif-service,
+      ]
+    ports: ["4000:4000"]
+
+  # Frontend
+  frontend:
+    build: ./apps/frontend
+    environment: { NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000/graphql }
+    ports: ["3000:3000"]
+
+volumes:
+  auth-data:
+  vehicles-data:
