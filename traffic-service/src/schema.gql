@@ -1,0 +1,36 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Zone {
+  id: ID!
+  name: String!
+  bounds: String!
+  densityLevel: TrafficLevel!
+  createdAt: DateTime!
+}
+
+enum TrafficLevel {
+  FAIBLE
+  MOYEN
+  ELEVE
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Query {
+  zones: [Zone!]!
+}
+
+type Mutation {
+  createZone(input: CreateZoneInput!): Zone!
+  updateZoneDensity(id: String!, level: TrafficLevel!): Zone!
+}
+
+input CreateZoneInput {
+  name: String!
+  bounds: String!
+}

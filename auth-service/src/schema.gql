@@ -1,0 +1,47 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: DateTime!
+}
+
+enum UserRole {
+  ADMIN
+  OPERATOR
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type Query {
+  me: User!
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+}
+
+input RegisterInput {
+  email: String!
+  name: String!
+  password: String!
+  role: UserRole
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}

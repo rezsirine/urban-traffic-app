@@ -1,0 +1,47 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Vehicle {
+  id: ID!
+  licensePlate: String!
+  type: String!
+  status: String!
+  positions: [GpsPosition!]
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type GpsPosition {
+  id: ID!
+  lat: Float!
+  lng: Float!
+  timestamp: DateTime!
+}
+
+type Query {
+  vehicles: [Vehicle!]!
+  vehicle(id: String!): Vehicle!
+  vehicleHistory(vehicleId: String!): [GpsPosition!]!
+}
+
+type Mutation {
+  addVehicle(input: AddVehicleInput!): Vehicle!
+  recordPosition(input: RecordPositionInput!): GpsPosition!
+}
+
+input AddVehicleInput {
+  licensePlate: String!
+  type: String!
+  status: String!
+}
+
+input RecordPositionInput {
+  vehicleId: String!
+  lat: Float!
+  lng: Float!
+}
