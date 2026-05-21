@@ -1,18 +1,24 @@
 'use client';
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client/react';
-import { GET_VEHICLES } from '../../lib/queries';
-import { Search, Plus, Eye } from 'lucide-react';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { GET_VEHICLES, ADD_VEHICLE } from '../../lib/queries';
+import { Search, Plus, Eye, X } from 'lucide-react';
 import styles from './vehicles.module.css';
 
 export default function VehiclesPage() {
   const { data, loading, error } = useQuery(GET_VEHICLES);
+  const [addVehicle] = useMutation(ADD_VEHICLE, {
+    refetchQueries: [{ query: GET_VEHICLES }],
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newVehicle, setNewVehicle] = useState({ licensePlate: '', type: 'Bus', status: 'Actif' });
 
   if (loading) return <div className={styles.loading}>Chargement des véhicules...</div>;
   if (error) return <div className={styles.error}>Erreur: {error.message}</div>;
 
-  const vehicles = data?.vehicles || [];
+  const vehicles = (data as any)?.vehicles || [];
   
   const stats = {
     total: vehicles.length,
@@ -23,9 +29,15 @@ export default function VehiclesPage() {
 
   const filteredVehicles = vehicles.filter((v: any) => 
     v.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.driverName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.model.toLowerCase().includes(searchTerm.toLowerCase())
+    v.type.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await addVehicle({ variables: { input: newVehicle } });
+    setIsModalOpen(false);
+    setNewVehicle({ licensePlate: '', type: 'Bus', status: 'Actif' });
+  };
 
   return (
     <div className={styles.container}>
@@ -34,7 +46,7 @@ export default function VehiclesPage() {
           <Search size={18} className={styles.searchIcon} />
           <input 
             type="text" 
-            placeholder="Rechercher par plaque, conducteur, modèle..." 
+            placeholder="Rechercher par plaque ou type..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className={styles.searchInput}
@@ -47,7 +59,7 @@ export default function VehiclesPage() {
             <option>Inactif</option>
             <option>En panne</option>
           </select>
-          <button className={styles.addBtn}>
+          <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
             <Plus size={18} /> Ajouter un véhicule
           </button>
         </div>
@@ -66,11 +78,8 @@ export default function VehiclesPage() {
             <tr>
               <th>ID</th>
               <th>PLAQUE</th>
-              <th>TYPE / MODÈLE</th>
-              <th>CONDUCTEUR</th>
-              <th>ZONE</th>
+              <th>TYPE</th>
               <th>STATUT</th>
-              <th>DERNIÈRE POSITION</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
@@ -80,13 +89,8 @@ export default function VehiclesPage() {
                 <td className={styles.idCell}>{vehicle.id.slice(0,4)}</td>
                 <td className={styles.boldCell}>{vehicle.licensePlate}</td>
                 <td>
-                  <div className={styles.multilineCell}>
-                    <span className={styles.primaryText}>{vehicle.type}</span>
-                    <span className={styles.secondaryText}>{vehicle.model}</span>
-                  </div>
+                  <span className={styles.primaryText}>{vehicle.type}</span>
                 </td>
-                <td>{vehicle.driverName}</td>
-                <td>{vehicle.zoneName}</td>
                 <td>
                   <span className={`${styles.statusBadge} ${
                     vehicle.status === 'Actif' ? styles.statusActive : 
@@ -95,7 +99,6 @@ export default function VehiclesPage() {
                     {vehicle.status}
                   </span>
                 </td>
-                <td className={styles.timeCell}>{new Date(vehicle.lastPositionTime).toLocaleTimeString()}</td>
                 <td>
                   <button className={styles.actionBtn}>
                     <Eye size={16} /> Détail
@@ -106,6 +109,59 @@ export default function VehiclesPage() {
           </tbody>
         </table>
       </div>
+
+      {isModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Ajouter un véhicule</h3>
+              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}><X size={20}/></button>
+            </div>
+            <form onSubmit={handleAddVehicle} className={styles.form}>
+              <div className={styles.formGroup}>
+                <label>Plaque d'immatriculation</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="ex: 16-1234-ALG"
+                  value={newVehicle.licensePlate}
+                  onChange={e => setNewVehicle({...newVehicle, licensePlate: e.target.value})}
+                  className={styles.input}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Type de véhicule</label>
+                <select 
+                  value={newVehicle.type}
+                  onChange={e => setNewVehicle({...newVehicle, type: e.target.value})}
+                  className={styles.input}
+                >
+                  <option value="Bus">Bus</option>
+                  <option value="Tram">Tram</option>
+                  <option value="Métro">Métro</option>
+                  <option value="Voiture de service">Voiture de service</option>
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Statut</label>
+                <select 
+                  value={newVehicle.status}
+                  onChange={e => setNewVehicle({...newVehicle, status: e.target.value})}
+                  className={styles.input}
+                >
+                  <option value="Actif">Actif</option>
+                  <option value="Inactif">Inactif</option>
+                  <option value="En panne">En panne</option>
+                </select>
+              </div>
+              <div className={styles.formActions}>
+                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>Annuler</button>
+                <button type="submit" className={styles.submitBtn}>Ajouter</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

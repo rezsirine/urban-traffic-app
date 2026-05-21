@@ -9,16 +9,14 @@ export const GET_DASHBOARD_DATA = gql`
     zones {
       id
       name
-      level
-      surface
-      vehicleCount
-      updatedAt
+      densityLevel
+      createdAt
     }
     incidents {
       id
       type
       status
-      location
+      description
       createdAt
     }
   }
@@ -29,12 +27,19 @@ export const GET_VEHICLES = gql`
     vehicles {
       id
       licensePlate
-      model
       type
-      driverName
-      zoneName
       status
-      lastPositionTime
+    }
+  }
+`;
+
+export const ADD_VEHICLE = gql`
+  mutation AddVehicle($input: AddVehicleInput!) {
+    addVehicle(input: $input) {
+      id
+      licensePlate
+      type
+      status
     }
   }
 `;
@@ -44,10 +49,69 @@ export const GET_ZONES = gql`
     zones {
       id
       name
-      level
-      surface
-      vehicleCount
+      bounds
+      densityLevel
+      createdAt
+    }
+  }
+`;
+
+export const GET_INCIDENTS = gql`
+  query GetIncidents {
+    incidents {
+      id
+      description
+      type
+      status
+      lat
+      lng
+      reportedBy
+      createdAt
       updatedAt
+    }
+  }
+`;
+
+export const UPDATE_INCIDENT_STATUS = gql`
+  mutation UpdateIncidentStatus($id: String!, $status: IncidentStatus!) {
+    updateIncidentStatus(id: $id, status: $status) {
+      id
+      status
+    }
+  }
+`;
+
+export const DECLARE_INCIDENT = gql`
+  mutation DeclareIncident($input: DeclareIncidentInput!) {
+    declareIncident(input: $input) {
+      id
+      type
+      status
+      description
+      lat
+      lng
+      reportedBy
+    }
+  }
+`;
+
+export const GET_NOTIFICATIONS = gql`
+  query GetNotifications($userId: String!) {
+    notifications(userId: $userId) {
+      id
+      title
+      message
+      isRead
+      createdAt
+    }
+  }
+`;
+
+export const MARK_NOTIFICATION_READ = gql`
+  mutation MarkNotificationAsRead($id: String!) {
+    markNotificationAsRead(id: $id) {
+      id
+      isRead
     }
   }
 `;

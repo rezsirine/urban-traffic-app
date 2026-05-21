@@ -1,0 +1,189 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 900px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: white;
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.unreadBadge {
+  color: var(--status-red);
+  background-color: var(--status-red-bg);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #fecaca;
+}
+
+.markAllBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-blue);
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.markAllBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.markAllBtn:not(:disabled):hover {
+  text-decoration: underline;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin: 0;
+  padding-left: 8px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  display: flex;
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border-color);
+  gap: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.unreadCard {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.unreadCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.04);
+}
+
+.readCard {
+  background-color: #f8fafc;
+  opacity: 0.8;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: white;
+}
+
+.unreadCard .iconWrapper {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleGroup h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-dark);
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.badgeDanger { background-color: #fef2f2; color: #ef4444; border-color: #fecaca; }
+.badgeWarning { background-color: #fffbeb; color: #d97706; border-color: #fde68a; }
+.badgeInfo { background-color: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+
+.markReadText {
+  color: var(--primary-blue);
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.markReadText:hover {
+  text-decoration: underline;
+}
+
+.message {
+  font-size: 14px;
+  color: #4b5563;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.time {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text-muted);
+  background: white;
+  border-radius: 12px;
+  border: 1px dashed var(--border-color);
+}
+
+.loading, .error {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}

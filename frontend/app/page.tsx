@@ -37,8 +37,8 @@ export default function Dashboard() {
     if (!data) return { vehicles: 0, zones: 0, incidents: 0 };
     return {
       vehicles: data.vehicles.filter((v: any) => v.status === 'Actif').length || data.vehicles.length,
-      zones: data.zones.filter((z: any) => z.level === 'Red').length || data.zones.length,
-      incidents: data.incidents.filter((i: any) => i.status === 'En cours').length || data.incidents.length,
+      zones: data.zones.filter((z: any) => z.densityLevel === 'ELEVE').length || 0,
+      incidents: data.incidents.filter((i: any) => i.status === 'EN_COURS').length || data.incidents.length,
     };
   }, [data]);
 
