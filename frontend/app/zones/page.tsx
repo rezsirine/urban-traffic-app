@@ -1,0 +1,155 @@
+'use client';
+import React, { useMemo } from 'react';
+import { useQuery } from '@apollo/client/react';
+import { GET_ZONES } from '../../lib/queries';
+import styles from './zones.module.css';
+
+export default function ZonesPage() {
+  const { data, loading, error } = useQuery(GET_ZONES);
+
+  const stats = useMemo(() => {
+    if (!data) return { faible: 0, moyen: 0, eleve: 0 };
+    return {
+      faible: data.zones.filter((z: any) => z.level === 'Green').length,
+      moyen: data.zones.filter((z: any) => z.level === 'Yellow').length,
+      eleve: data.zones.filter((z: any) => z.level === 'Red').length,
+    };
+  }, [data]);
+
+  if (loading) return <div className={styles.loading}>Chargement des zones...</div>;
+  if (error) return <div className={styles.error}>Erreur: {error.message}</div>;
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={`${styles.dot} ${styles.dotGreen}`}></span> Faible
+          </div>
+          <div className={styles.statValue}>
+            {stats.faible} <span className={styles.statLabel}>zone(s)</span>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={`${styles.dot} ${styles.dotYellow}`}></span> Moyen
+          </div>
+          <div className={styles.statValue}>
+            {stats.moyen} <span className={styles.statLabel}>zone(s)</span>
+          </div>
+        </div>
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={`${styles.dot} ${styles.dotRed}`}></span> Élevé
+          </div>
+          <div className={styles.statValue}>
+            {stats.eleve} <span className={styles.statLabel}>zone(s)</span>
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.mainGrid}>
+        <div className={styles.zoneListSection}>
+          <div className={styles.sectionHeader}>Zones de circulation</div>
+          <div className={styles.zoneList}>
+            {data.zones.map((zone: any) => (
+              <div key={zone.id} className={styles.zoneItem}>
+                <div className={styles.zoneTop}>
+                  <div className={styles.zoneTitle}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    {zone.name}
+                  </div>
+                  <span className={`${styles.badge} ${
+                    zone.level === 'Red' ? styles.badgeRed : 
+                    zone.level === 'Yellow' ? styles.badgeYellow : styles.badgeGreen
+                  }`}>
+                    {zone.level === 'Red' ? 'Élevé' : zone.level === 'Yellow' ? 'Moyen' : 'Faible'}
+                  </span>
+                </div>
+                <div className={styles.progressContainer}>
+                  <div 
+                    className={`${styles.progressBar} ${
+                      zone.level === 'Red' ? styles.bgRed : 
+                      zone.level === 'Yellow' ? styles.bgYellow : styles.bgGreen
+                    }`} 
+                    style={{ width: `${zone.surface * 10}%` }}
+                  ></div>
+                </div>
+                <div className={styles.zoneFooter}>
+                  <span>{zone.vehicleCount} véhicules</span>
+                  <span>{zone.surface} km²</span>
+                  <span>Màj {new Date(zone.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.mapSection}>
+          <div className={styles.mapCard}>
+            <div className={styles.mapHeader}>
+              <h3>Carte de densité — Alger</h3>
+              <span className={styles.realtimeBadge}>
+                <span className={styles.liveDot}></span> Temps réel
+              </span>
+            </div>
+            
+            <div className={styles.mapGrid}>
+              {data.zones.map((zone: any) => (
+                <div key={zone.id} className={`${styles.mapBlock} ${
+                  zone.level === 'Red' ? styles.blockRed : 
+                  zone.level === 'Yellow' ? styles.blockYellow : styles.blockGreen
+                }`}>
+                  <div className={styles.blockName}>{zone.name}</div>
+                  <div className={styles.blockDensity}>{zone.surface * 10}%</div>
+                </div>
+              ))}
+            </div>
+            
+            <div className={styles.mapLegend}>
+              <span><span className={`${styles.dot} ${styles.dotGreen}`}></span> Faible</span>
+              <span><span className={`${styles.dot} ${styles.dotYellow}`}></span> Moyen</span>
+              <span><span className={`${styles.dot} ${styles.dotRed}`}></span> Élevé</span>
+            </div>
+          </div>
+          
+          <div className={styles.detailCard}>
+            <div className={styles.detailHeader}>
+              <h3>Détail — {data.zones[0]?.name}</h3>
+              <span className={`${styles.badge} ${
+                data.zones[0]?.level === 'Red' ? styles.badgeRed : 
+                data.zones[0]?.level === 'Yellow' ? styles.badgeYellow : styles.badgeGreen
+              }`}>
+                {data.zones[0]?.level === 'Red' ? 'Élevé' : data.zones[0]?.level === 'Yellow' ? 'Moyen' : 'Faible'}
+              </span>
+            </div>
+            
+            <div className={styles.detailGrid}>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Surface</span>
+                <span className={styles.detailValue}>{data.zones[0]?.surface} km²</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Véhicules</span>
+                <span className={styles.detailValue}>{data.zones[0]?.vehicleCount}</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Densité</span>
+                <span className={styles.detailValue}>{data.zones[0]?.surface * 10}%</span>
+              </div>
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Dernière mise à jour</span>
+                <span className={styles.detailValue}>
+                  {new Date(data.zones[0]?.updatedAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

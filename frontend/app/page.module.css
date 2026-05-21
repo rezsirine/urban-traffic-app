@@ -1,0 +1,230 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.kpiCard {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.kpiHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.iconWrapper {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kpiTrend {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  gap: 4px;
+}
+
+.kpiValue {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.kpiLabel {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border: 1px solid var(--border-color);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.cardHeader h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.cardSubtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.dateBadge {
+  font-size: 12px;
+  background-color: var(--bg-light);
+  padding: 4px 12px;
+  border-radius: 12px;
+  color: var(--text-muted);
+}
+
+.link {
+  font-size: 13px;
+  color: var(--primary-blue);
+  font-weight: 500;
+}
+
+.chartContainer {
+  height: 250px;
+  width: 100%;
+}
+
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.incidentList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.incidentItem {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.incidentItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.incidentIcon {
+  margin-top: 4px;
+}
+
+.incidentInfo {
+  flex: 1;
+}
+
+.incidentTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.incidentTop h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+
+.incidentInfo p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 4px 0;
+}
+
+.incidentInfo span {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.zoneList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.zoneItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zoneTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.zoneTop h4 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.zoneBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.zoneBadge.red { background-color: var(--status-red-bg); color: var(--status-red); }
+.zoneBadge.yellow { background-color: var(--status-yellow-bg); color: var(--status-yellow); }
+.zoneBadge.green { background-color: var(--status-green-bg); color: var(--status-green); }
+
+.progressContainer {
+  height: 6px;
+  background-color: var(--bg-light);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progressBar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.bg-red { background-color: var(--status-red); }
+.bg-yellow { background-color: var(--status-yellow); }
+.bg-green { background-color: var(--status-green); }
+
+.loading, .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-size: 16px;
+  color: var(--text-muted);
+}

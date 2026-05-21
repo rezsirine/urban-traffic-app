@@ -1,0 +1,154 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.searchBar {
+  flex: 1;
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.searchIcon {
+  color: var(--text-muted);
+}
+
+.searchInput {
+  border: none;
+  padding: 12px;
+  width: 100%;
+  outline: none;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.filterSelect {
+  padding: 0 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: white;
+  outline: none;
+}
+
+.addBtn {
+  background-color: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.addBtn:hover {
+  background-color: var(--primary-blue-hover);
+}
+
+.statsBar {
+  display: flex;
+  gap: 24px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.statActive { color: var(--status-green); }
+.statInactive { color: var(--text-muted); }
+.statError { color: var(--status-red); }
+
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  background-color: rgba(249, 250, 251, 0.5);
+}
+
+.table td {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 14px;
+}
+
+.table tr:hover {
+  background-color: var(--bg-light);
+}
+
+.idCell { color: var(--text-muted); }
+.boldCell { font-weight: 500; }
+
+.multilineCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.primaryText { font-weight: 500; }
+.secondaryText { font-size: 12px; color: var(--text-muted); }
+
+.statusBadge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statusActive { background-color: var(--status-green-bg); color: var(--status-green); border: 1px solid #a7f3d0; }
+.statusError { background-color: var(--status-red-bg); color: var(--status-red); border: 1px solid #fecaca; }
+.statusInactive { background-color: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; }
+
+.timeCell { color: var(--text-muted); }
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary-blue);
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.actionBtn:hover {
+  text-decoration: underline;
+}
+
+.loading, .error {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
