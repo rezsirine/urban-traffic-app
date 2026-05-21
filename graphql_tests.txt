@@ -1,0 +1,77 @@
+# Requêtes de Test GraphQL (à tester sur http://localhost:4000/graphql)
+
+# 1. Authentification
+mutation Login {
+  login(input: { email: "admin@urbanflow.dz", password: "password" }) {
+    token
+    user {
+      id
+      email
+      role
+    }
+  }
+}
+
+# 2. Consulter la liste des véhicules
+query GetVehicles {
+  vehicles {
+    id
+    licensePlate
+    type
+    status
+  }
+}
+
+# 3. Ajouter un véhicule
+mutation AddVehicle {
+  addVehicle(input: { licensePlate: "16-5678-ALG", type: "Bus", status: "Actif" }) {
+    id
+    licensePlate
+  }
+}
+
+# 4. Consulter les zones de circulation
+query GetZones {
+  zones {
+    id
+    name
+    densityLevel
+    createdAt
+  }
+}
+
+# 5. Déclarer un incident
+mutation DeclareIncident {
+  declareIncident(input: { type: "ACCIDENT", description: "Accident grave autoroute Est", lat: 36.7, lng: 3.1, reportedBy: "Admin" }) {
+    id
+    type
+    status
+  }
+}
+
+# 6. Consulter les incidents
+query GetIncidents {
+  incidents {
+    id
+    type
+    status
+    description
+  }
+}
+
+# 7. Envoyer une notification (Simuler un backend push)
+mutation SendNotification {
+  sendNotification(input: { userId: "Admin", title: "Alerte Rouge", message: "Gros bouchon détecté." }) {
+    id
+    title
+  }
+}
+
+# 8. Consulter les notifications
+query GetNotifications {
+  notifications(userId: "Admin") {
+    id
+    title
+    isRead
+  }
+}

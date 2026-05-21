@@ -44,6 +44,29 @@ export const ADD_VEHICLE = gql`
   }
 `;
 
+export const GET_VEHICLE = gql`
+  query GetVehicle($id: String!) {
+    vehicle(id: $id) {
+      id
+      licensePlate
+      type
+      status
+      createdAt
+    }
+  }
+`;
+
+export const GET_VEHICLE_HISTORY = gql`
+  query GetVehicleHistory($vehicleId: String!) {
+    vehicleHistory(vehicleId: $vehicleId) {
+      id
+      lat
+      lng
+      timestamp
+    }
+  }
+`;
+
 export const GET_ZONES = gql`
   query GetZones {
     zones {
@@ -112,6 +135,20 @@ export const MARK_NOTIFICATION_READ = gql`
     markNotificationAsRead(id: $id) {
       id
       isRead
+    }
+  }
+`;
+
+export const LOGIN = gql`
+  mutation Login($input: LoginInput!) {
+    login(input: $input) {
+      token
+      user {
+        id
+        email
+        name
+        role
+      }
     }
   }
 `;

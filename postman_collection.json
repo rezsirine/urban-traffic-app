@@ -1,0 +1,53 @@
+{
+	"info": {
+		"name": "UrbanFlow GraphQL API",
+		"description": "Collection de requêtes pour tester la Gateway GraphQL du projet UrbanFlow.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"url": {"raw": "http://localhost:4000/graphql", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["graphql"]},
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation Login($input: LoginInput!) {\n  login(input: $input) {\n    token\n    user {\n      email\n      role\n    }\n  }\n}",
+						"variables": "{\n  \"input\": {\n    \"email\": \"admin@urbanflow.dz\",\n    \"password\": \"password123\"\n  }\n}"
+					}
+				}
+			}
+		},
+		{
+			"name": "Get Vehicles",
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"url": {"raw": "http://localhost:4000/graphql", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["graphql"]},
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "query {\n  vehicles {\n    id\n    licensePlate\n    type\n    status\n  }\n}"
+					}
+				}
+			}
+		},
+		{
+			"name": "Declare Incident",
+			"request": {
+				"method": "POST",
+				"header": [{"key": "Content-Type", "value": "application/json"}],
+				"url": {"raw": "http://localhost:4000/graphql", "protocol": "http", "host": ["localhost"], "port": "4000", "path": ["graphql"]},
+				"body": {
+					"mode": "graphql",
+					"graphql": {
+						"query": "mutation DeclareIncident($input: DeclareIncidentInput!) {\n  declareIncident(input: $input) {\n    id\n    type\n    status\n  }\n}",
+						"variables": "{\n  \"input\": {\n    \"type\": \"ACCIDENT\",\n    \"description\": \"Test incident\",\n    \"lat\": 36.7,\n    \"lng\": 3.1,\n    \"reportedBy\": \"Admin\"\n  }\n}"
+					}
+				}
+			}
+		}
+	]
+}

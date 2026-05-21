@@ -1,20 +1,31 @@
 'use client';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_NOTIFICATIONS, MARK_NOTIFICATION_READ } from '../../lib/queries';
 import { AlertCircle, AlertTriangle, Bell, CheckCircle2 } from 'lucide-react';
+import { io } from 'socket.io-client';
 import styles from './notifications.module.css';
 
 export default function NotificationsPage() {
-  // Using a hardcoded userId "admin-1" for demo purposes or it should come from context
-  const { data, loading, error } = useQuery(GET_NOTIFICATIONS, {
-    variables: { userId: 'admin-1' },
-    fetchPolicy: 'network-only' // always fetch latest
+  const [mounted, setMounted] = useState(false);
+  const { data, loading, error, refetch } = useQuery(GET_NOTIFICATIONS, {
+    variables: { userId: 'Admin' },
+    fetchPolicy: 'network-only',
+    skip: !mounted
   });
   
   const [markAsRead] = useMutation(MARK_NOTIFICATION_READ, {
-    refetchQueries: [{ query: GET_NOTIFICATIONS, variables: { userId: 'admin-1' } }],
+    refetchQueries: [{ query: GET_NOTIFICATIONS, variables: { userId: 'Admin' } }],
   });
+
+  useEffect(() => {
+    setMounted(true);
+    const socket = io('http://localhost:3005');
+    socket.on('notification_Admin', () => {
+      refetch();
+    });
+    return () => { socket.disconnect(); };
+  }, [refetch]);
 
   const unreadNotifs = useMemo(() => {
     return data?.notifications?.filter((n: any) => !n.isRead) || [];
@@ -100,7 +111,7 @@ export default function NotificationsPage() {
                     </button>
                   </div>
                   <p className={styles.message}>{notif.message}</p>
-                  <span className={styles.time}>
+                  <span className={styles.time} suppressHydrationWarning>
                     Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </span>
                 </div>
@@ -126,7 +137,7 @@ export default function NotificationsPage() {
                     <h4>{notif.title}</h4>
                   </div>
                   <p className={styles.message}>{notif.message}</p>
-                  <span className={styles.time}>
+                  <span className={styles.time} suppressHydrationWarning>
                     Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                   </span>
                 </div>

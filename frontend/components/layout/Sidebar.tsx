@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, CarFront, Map, AlertTriangle, Bell, LogOut } from 'lucide-react';
@@ -7,6 +7,27 @@ import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userData = localStorage.getItem('user');
+    
+    if (!token && window.location.pathname !== '/login') {
+      window.location.href = '/login';
+      return;
+    }
+
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  };
 
   const navItems = [
     { path: '/', label: 'Tableau de bord', icon: LayoutDashboard },
@@ -45,12 +66,12 @@ export default function Sidebar() {
       </nav>
 
       <div className={styles.userProfile}>
-        <div className={styles.avatar}>MA</div>
+        <div className={styles.avatar}>{user ? user.name.slice(0, 2).toUpperCase() : 'MA'}</div>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>Mohamed Amine</span>
-          <span className={styles.userRole}>ADMIN</span>
+          <span className={styles.userName}>{user ? user.name : 'Mohamed Amine'}</span>
+          <span className={styles.userRole}>{user ? user.role : 'ADMIN'}</span>
         </div>
-        <button className={styles.logoutBtn}>
+        <button className={styles.logoutBtn} onClick={handleLogout}>
           <LogOut size={18} />
         </button>
       </div>

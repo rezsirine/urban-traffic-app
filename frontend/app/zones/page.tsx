@@ -111,7 +111,7 @@ export default function ZonesPage() {
                 <div className={styles.zoneFooter}>
                   <span>- véhicules</span>
                   <span>- km²</span>
-                  <span>Màj {new Date(zone.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  <span suppressHydrationWarning>Màj {new Date(zone.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
                 </div>
               </div>
             ))}
@@ -169,7 +169,7 @@ export default function ZonesPage() {
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Dernière mise à jour</span>
-                <span className={styles.detailValue}>
+                <span className={styles.detailValue} suppressHydrationWarning>
                   {new Date(data.zones[0]?.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                 </span>
               </div>

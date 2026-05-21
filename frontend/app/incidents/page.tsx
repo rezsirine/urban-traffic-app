@@ -17,6 +17,9 @@ export default function IncidentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newIncident, setNewIncident] = useState({ type: 'ACCIDENT', zone: 'Centre-Ville', loc: '', desc: '' });
 
+  const [typeFilter, setTypeFilter] = useState('Tous les types');
+  const [statusFilter, setStatusFilter] = useState('Tous les statuts');
+
   const stats = useMemo(() => {
     if (!data) return { signale: 0, enCours: 0, resolu: 0 };
     return {
@@ -25,6 +28,27 @@ export default function IncidentsPage() {
       resolu: data.incidents.filter((i: any) => i.status === 'RESOLU').length,
     };
   }, [data]);
+
+  const matchType = (type: string, filter: string) => {
+    if (filter === 'Tous les types') return true;
+    if (filter === 'Accident') return type === 'ACCIDENT';
+    if (filter === 'Travaux') return type === 'TRAVAUX';
+    if (filter === 'Embouteillage') return type === 'EMBOUTEILLAGE';
+    if (filter === 'Route fermée') return type === 'ROUTE_FERMEE';
+    return true;
+  };
+
+  const matchStatus = (status: string, filter: string) => {
+    if (filter === 'Tous les statuts') return true;
+    if (filter === 'Signalé') return status === 'SIGNALE';
+    if (filter === 'En cours') return status === 'EN_COURS';
+    if (filter === 'Résolu') return status === 'RESOLU';
+    return true;
+  };
+
+  const filteredIncidents = (data?.incidents || []).filter((i: any) => 
+    matchType(i.type, typeFilter) && matchStatus(i.status, statusFilter)
+  );
 
   const handleUpdateStatus = (id: string, status: string) => {
     updateStatus({ variables: { id, status } });
@@ -83,18 +107,18 @@ export default function IncidentsPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.filters}>
-          <select className={styles.select}>
-            <option>Tous les types</option>
-            <option>Accident</option>
-            <option>Travaux</option>
-            <option>Embouteillage</option>
-            <option>Route fermée</option>
+          <select className={styles.select} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+            <option value="Tous les types">Tous les types</option>
+            <option value="Accident">Accident</option>
+            <option value="Travaux">Travaux</option>
+            <option value="Embouteillage">Embouteillage</option>
+            <option value="Route fermée">Route fermée</option>
           </select>
-          <select className={styles.select}>
-            <option>Tous les statuts</option>
-            <option>Signalé</option>
-            <option>En cours</option>
-            <option>Résolu</option>
+          <select className={styles.select} value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+            <option value="Tous les statuts">Tous les statuts</option>
+            <option value="Signalé">Signalé</option>
+            <option value="En cours">En cours</option>
+            <option value="Résolu">Résolu</option>
           </select>
         </div>
         <button className={styles.declareBtn} onClick={() => setIsModalOpen(true)}>+ Déclarer un incident</button>
@@ -107,7 +131,7 @@ export default function IncidentsPage() {
       </div>
 
       <div className={styles.list}>
-        {data.incidents.map((incident: any) => (
+        {filteredIncidents.map((incident: any) => (
           <div key={incident.id} className={styles.card}>
             <div className={styles.cardIcon}>
               {getIconForType(incident.type)}
@@ -138,7 +162,7 @@ export default function IncidentsPage() {
               <div className={styles.metaRow}>
                 <span>Zone : <b>Alger</b></span>
                 <span>Signalé par : <b>{incident.reportedBy}</b></span>
-                <span>{new Date(incident.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                <span suppressHydrationWarning>{new Date(incident.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
               </div>
             </div>
 
@@ -168,6 +192,73 @@ export default function IncidentsPage() {
           </div>
         ))}
       </div>
+
+      {isModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Déclarer un incident</h3>
+              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}><X size={20}/></button>
+            </div>
+            <form onSubmit={handleDeclare} className={styles.form}>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <label>Type</label>
+                  <select 
+                    value={newIncident.type}
+                    onChange={e => setNewIncident({...newIncident, type: e.target.value})}
+                    className={styles.input}
+                  >
+                    <option value="ACCIDENT">Accident</option>
+                    <option value="TRAVAUX">Travaux</option>
+                    <option value="EMBOUTEILLAGE">Embouteillage</option>
+                    <option value="ROUTE_FERMEE">Route fermée</option>
+                  </select>
+                </div>
+                <div className={styles.formGroup}>
+                  <label>Zone</label>
+                  <select 
+                    value={newIncident.zone}
+                    onChange={e => setNewIncident({...newIncident, zone: e.target.value})}
+                    className={styles.input}
+                  >
+                    <option value="Centre-Ville">Centre-Ville</option>
+                    <option value="Bab El Oued">Bab El Oued</option>
+                    <option value="El Harrach">El Harrach</option>
+                    <option value="Bab Ezzouar">Bab Ezzouar</option>
+                  </select>
+                </div>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Localisation précise</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="Rue, carrefour, km..."
+                  value={newIncident.loc}
+                  onChange={e => setNewIncident({...newIncident, loc: e.target.value})}
+                  className={styles.input}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Description</label>
+                <textarea 
+                  required 
+                  placeholder="Décrivez l'incident en détail..."
+                  value={newIncident.desc}
+                  onChange={e => setNewIncident({...newIncident, desc: e.target.value})}
+                  className={styles.textarea}
+                  rows={4}
+                />
+              </div>
+              <div className={styles.formActions}>
+                <button type="button" onClick={() => setIsModalOpen(false)} className={styles.cancelBtn}>Annuler</button>
+                <button type="submit" className={styles.submitBtn}>Déclarer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

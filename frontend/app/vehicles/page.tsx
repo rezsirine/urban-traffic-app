@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { GET_VEHICLES, ADD_VEHICLE } from '../../lib/queries';
 import { Search, Plus, Eye, X } from 'lucide-react';
+import Link from 'next/link';
 import styles from './vehicles.module.css';
 
 export default function VehiclesPage() {
@@ -12,6 +13,7 @@ export default function VehiclesPage() {
   });
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Tous les statuts');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newVehicle, setNewVehicle] = useState({ licensePlate: '', type: 'Bus', status: 'Actif' });
 
@@ -28,8 +30,9 @@ export default function VehiclesPage() {
   };
 
   const filteredVehicles = vehicles.filter((v: any) => 
-    v.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    v.type.toLowerCase().includes(searchTerm.toLowerCase())
+    (statusFilter === 'Tous les statuts' || v.status === statusFilter) &&
+    (v.licensePlate.toLowerCase().includes(searchTerm.toLowerCase()) ||
+     v.type.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const handleAddVehicle = async (e: React.FormEvent) => {
@@ -53,11 +56,11 @@ export default function VehiclesPage() {
           />
         </div>
         <div className={styles.actions}>
-          <select className={styles.filterSelect}>
-            <option>Tous les statuts</option>
-            <option>Actif</option>
-            <option>Inactif</option>
-            <option>En panne</option>
+          <select className={styles.filterSelect} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="Tous les statuts">Tous les statuts</option>
+            <option value="Actif">Actif</option>
+            <option value="Inactif">Inactif</option>
+            <option value="En panne">En panne</option>
           </select>
           <button className={styles.addBtn} onClick={() => setIsModalOpen(true)}>
             <Plus size={18} /> Ajouter un véhicule
@@ -100,9 +103,9 @@ export default function VehiclesPage() {
                   </span>
                 </td>
                 <td>
-                  <button className={styles.actionBtn}>
+                  <Link href={`/vehicles/${vehicle.id}`} className={styles.actionBtn}>
                     <Eye size={16} /> Détail
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}
