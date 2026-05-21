@@ -1,7 +1,5 @@
 # UrbanFlow - Plateforme Intelligente de Gestion du Trafic Urbain
 
-Mini Projet – Web Services & GraphQL
-
 ## Architecture
 
 Ce projet est basé sur une architecture **Microservices** communicant via une **API Gateway GraphQL (Apollo)**.
