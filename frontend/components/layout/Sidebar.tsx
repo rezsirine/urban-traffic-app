@@ -47,7 +47,7 @@ export default function Sidebar() {
 
   const navItems = [
     { path: '/', label: 'Tableau de bord', icon: LayoutDashboard, roles: ['ADMIN'] },
-    { path: '/vehicles', label: 'Véhicules', icon: CarFront, roles: ['ADMIN'] },
+    { path: '/vehicles', label: 'Véhicules', icon: CarFront, roles: ['ADMIN', 'OPERATOR'] },
     { path: '/zones', label: 'Zones de trafic', icon: Map, roles: ['ADMIN', 'OPERATOR'] },
     { path: '/incidents', label: 'Incidents', icon: AlertTriangle, roles: ['ADMIN', 'OPERATOR'] },
     { path: '/notifications', label: 'Notifications', icon: Bell, roles: ['ADMIN', 'OPERATOR'] },
