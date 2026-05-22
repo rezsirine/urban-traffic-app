@@ -1,0 +1,87 @@
+name: UrbanFlow CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "sirine" ]
+  pull_request:
+    branches: [ "main", "sirine" ]
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # JOB 1 : Tests unitaires de tous les microservices
+  # ─────────────────────────────────────────────────────────────
+  unit-tests:
+    name: "Tests Unitaires — ${{ matrix.service }}"
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - auth-service
+          - incident-service
+          - vehicle-service
+          - traffic-service
+          - notif-service
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: ${{ matrix.service }}/package-lock.json
+
+      - name: Installation des dépendances (${{ matrix.service }})
+        run: |
+          cd ${{ matrix.service }}
+          npm ci
+
+      - name: Lancer les tests (${{ matrix.service }})
+        run: |
+          cd ${{ matrix.service }}
+          npm run test -- --passWithNoTests --forceExit
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 2 : Vérification du build Docker (CI)
+  # Ne se lance que si tous les tests passent
+  # ─────────────────────────────────────────────────────────────
+  docker-build:
+    name: "CI — Build Docker Images"
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build de toutes les images Docker
+        run: docker compose build
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 3 : Déploiement Continu (CD) — Optionnel
+  # Se déclenche uniquement sur push vers "main"
+  # Décommentez et configurez pour votre serveur de production
+  # ─────────────────────────────────────────────────────────────
+  # deploy:
+  #   name: "CD — Déploiement en Production"
+  #   runs-on: ubuntu-latest
+  #   needs: docker-build
+  #   if: github.ref == 'refs/heads/main'
+  #
+  #   steps:
+  #     - name: Deploy via SSH
+  #       uses: appleboy/ssh-action@master
+  #       with:
+  #         host: ${{ secrets.SERVER_HOST }}
+  #         username: ${{ secrets.SERVER_USER }}
+  #         key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         script: |
+  #           cd /opt/urban-traffic-app
+  #           git pull origin main
+  #           docker compose down && docker compose up -d --build
