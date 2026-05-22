@@ -27,7 +27,7 @@ interface ZonesMapProps {
 export default function ZonesMap({ zones }: ZonesMapProps) {
   const [isMounted, setIsMounted] = useState(false);
 
-  const [center, setCenter] = useState<[number, number]>([36.7525, 3.04197]); // Default: Algiers
+  const [center, setCenter] = useState<[number, number]>([36.8065, 10.1815]); // Default: Tunis
 
   useEffect(() => {
     setIsMounted(true);
@@ -72,10 +72,10 @@ export default function ZonesMap({ zones }: ZonesMapProps) {
             } catch (e) {
               // fallback square
               positions = [
-                [36.76, 3.03],
-                [36.76, 3.05],
-                [36.74, 3.05],
-                [36.74, 3.03]
+                [36.81, 10.17],
+                [36.81, 10.19],
+                [36.80, 10.19],
+                [36.80, 10.17]
               ];
             }
           }

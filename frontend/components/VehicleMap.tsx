@@ -26,7 +26,7 @@ interface VehicleMapProps {
 
 export default function VehicleMap({ latestPos, history }: VehicleMapProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const [defaultCenter, setDefaultCenter] = useState<[number, number]>([36.7525, 3.04197]);
+  const [defaultCenter, setDefaultCenter] = useState<[number, number]>([36.8065, 10.1815]);
 
   useEffect(() => {
     setIsMounted(true);

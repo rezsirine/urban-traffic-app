@@ -210,7 +210,7 @@ export default function IncidentsPage() {
               )}
 
               <div className={styles.metaRow}>
-                <span>Zone : <b>Alger</b></span>
+                <span>Zone : <b>Tunis</b></span>
                 <span>Signalé par : <b>{incident.reportedBy}</b></span>
                 <span suppressHydrationWarning>{new Date(incident.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
@@ -273,9 +273,9 @@ export default function IncidentsPage() {
                     className={styles.input}
                   >
                     <option value="Centre-Ville">Centre-Ville</option>
-                    <option value="Bab El Oued">Bab El Oued</option>
-                    <option value="El Harrach">El Harrach</option>
-                    <option value="Bab Ezzouar">Bab Ezzouar</option>
+                    <option value="Carthage">Carthage</option>
+                    <option value="La Marsa">La Marsa</option>
+                    <option value="Le Bardo">Le Bardo</option>
                   </select>
                 </div>
               </div>

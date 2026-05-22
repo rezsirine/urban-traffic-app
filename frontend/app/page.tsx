@@ -83,14 +83,14 @@ export default function Dashboard() {
         tension: 0.4,
       },
       {
-        label: 'Bab El Oued',
+        label: 'Carthage',
         data: [25, 42, 78, 82, 63, 58, 62, 75, 88],
         borderColor: '#ef4444',
         borderDash: [5, 5],
         tension: 0.4,
       },
       {
-        label: 'El Harrach',
+        label: 'La Marsa',
         data: [25, 40, 75, 80, 65, 60, 60, 74, 85],
         borderColor: '#10b981',
         borderDash: [2, 2],

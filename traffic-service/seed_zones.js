@@ -10,9 +10,9 @@ client.connect().then(() => {
   return client.query(`
     INSERT INTO zones (id, name, bounds, "densityLevel") 
     VALUES 
-      (gen_random_uuid(), 'Centre-Ville', '[[36.77, 3.05], [36.77, 3.06], [36.76, 3.06], [36.76, 3.05]]', 'MOYEN'),
-      (gen_random_uuid(), 'Bab El Oued', '[[36.79, 3.04], [36.79, 3.05], [36.78, 3.05], [36.78, 3.04]]', 'ELEVE'),
-      (gen_random_uuid(), 'El Harrach', '[[36.72, 3.13], [36.72, 3.15], [36.70, 3.15], [36.70, 3.13]]', 'FAIBLE')
+      (gen_random_uuid(), 'Centre-Ville', '[[36.81, 10.17], [36.81, 10.19], [36.80, 10.19], [36.80, 10.17]]', 'MOYEN'),
+      (gen_random_uuid(), 'Carthage', '[[36.86, 10.32], [36.86, 10.34], [36.84, 10.34], [36.84, 10.32]]', 'ELEVE'),
+      (gen_random_uuid(), 'La Marsa', '[[36.89, 10.32], [36.89, 10.34], [36.87, 10.34], [36.87, 10.32]]', 'FAIBLE')
   `);
 }).then(() => {
   console.log('Zones seeded');
