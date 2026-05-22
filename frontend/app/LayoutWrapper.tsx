@@ -28,7 +28,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     if (userStr && !isAuthPage) {
       try {
         const user = JSON.parse(userStr);
-        if (user.role === 'OPERATOR' && (pathname === '/' || pathname.startsWith('/vehicles'))) {
+        if (user.role === 'OPERATOR' && pathname === '/') {
           router.push('/incidents');
         }
       } catch (e) {

@@ -20,6 +20,24 @@ export class TrafficService implements OnModuleInit {
         { name: 'La Marsa', bounds: '[[36.89, 10.32], [36.89, 10.34], [36.87, 10.34], [36.87, 10.32]]', densityLevel: TrafficLevel.FAIBLE },
       ]);
     }
+
+    // Dynamic Density Simulation for Demo purposes (updates every 10s)
+    setInterval(async () => {
+      try {
+        const zones = await this.zoneRepo.find();
+        for (const zone of zones) {
+          // 30% chance to change density level
+          if (Math.random() > 0.7) {
+            const levels = [TrafficLevel.FAIBLE, TrafficLevel.MOYEN, TrafficLevel.ELEVE];
+            const newLevel = levels[Math.floor(Math.random() * levels.length)];
+            if (zone.densityLevel !== newLevel) {
+              zone.densityLevel = newLevel;
+              await this.zoneRepo.save(zone);
+            }
+          }
+        }
+      } catch (err) {}
+    }, 10000);
   }
 
   async createZone(input: CreateZoneInput): Promise<Zone> {

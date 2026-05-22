@@ -10,7 +10,9 @@ const ZonesMap = dynamic(() => import('../../components/ZonesMap'), {
 });
 
 export default function ZonesPage() {
-  const { data, loading, error } = useQuery<any>(GET_ZONES);
+  const { data, loading, error } = useQuery<any>(GET_ZONES, {
+    pollInterval: 5000 // Poll every 5s to see dynamic changes
+  });
 
   const stats = useMemo(() => {
     const zones = data?.zones || [];
