@@ -8,7 +8,7 @@ import styles from './notifications.module.css';
 
 export default function NotificationsPage() {
   // Using a hardcoded userId "admin-1" for demo purposes or it should come from context
-  const { data, loading, error } = useQuery<any>(GET_NOTIFICATIONS, {
+  const { data, loading, error, refetch } = useQuery<any>(GET_NOTIFICATIONS, {
     variables: { userId: 'admin-1' },
     fetchPolicy: 'network-only' // always fetch latest
   });
@@ -18,7 +18,6 @@ export default function NotificationsPage() {
   });
 
   useEffect(() => {
-    setMounted(true);
     const socket = io('http://localhost:3005');
     socket.on('notification_Admin', () => {
       refetch();

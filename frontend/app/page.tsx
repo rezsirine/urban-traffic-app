@@ -94,6 +94,7 @@ export default function Dashboard() {
 
   if (loading) return <div className={styles.loading}>Chargement des données...</div>;
   if (error) return <div className={styles.error}>Erreur: {error.message}</div>;
+  if (!data) return <div className={styles.loading}>Aucune donnée disponible.</div>;
 
   return (
     <div className={styles.dashboard}>
@@ -120,7 +121,7 @@ export default function Dashboard() {
               2 zone(s) rouge
             </span>
           </div>
-          <div className={styles.kpiValue}>{(data as any).zones.length}</div>
+          <div className={styles.kpiValue}>{(data as any).zones?.length ?? 0}</div>
           <div className={styles.kpiLabel}>Zones surveillées</div>
         </div>
 
@@ -204,22 +205,26 @@ export default function Dashboard() {
             <a href="/zones" className={styles.link}>Voir tout &rarr;</a>
           </div>
           <div className={styles.zoneList}>
-            {(data as any).zones.slice(0, 5).map((zone: any) => (
-              <div key={zone.id} className={styles.zoneItem}>
-                <div className={styles.zoneTop}>
-                  <h4>{zone.name}</h4>
-                  <span className={`${styles.zoneBadge} ${styles[zone.level.toLowerCase()]}`}>
-                    {zone.level}
-                  </span>
+            {(data as any).zones.slice(0, 5).map((zone: any) => {
+              const level = (zone.densityLevel || zone.level || 'NORMAL').toLowerCase();
+              const displayLevel = (zone.densityLevel || zone.level || 'NORMAL');
+              return (
+                <div key={zone.id} className={styles.zoneItem}>
+                  <div className={styles.zoneTop}>
+                    <h4>{zone.name}</h4>
+                    <span className={`${styles.zoneBadge} ${styles[level] || ''}`}>
+                      {displayLevel}
+                    </span>
+                  </div>
+                  <div className={styles.progressContainer}>
+                    <div 
+                      className={`${styles.progressBar} ${styles[`bg-${level}`] || ''}`} 
+                      style={{ width: level === 'eleve' ? '85%' : level === 'moyen' ? '55%' : '25%' }}
+                    ></div>
+                  </div>
                 </div>
-                <div className={styles.progressContainer}>
-                  <div 
-                    className={`${styles.progressBar} ${styles[`bg-${zone.level.toLowerCase()}`]}`} 
-                    style={{ width: `${zone.surface * 10}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
