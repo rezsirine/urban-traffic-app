@@ -7,7 +7,7 @@ import Link from 'next/link';
 import styles from './vehicles.module.css';
 
 export default function VehiclesPage() {
-  const { data, loading, error } = useQuery(GET_VEHICLES);
+  const { data, loading, error } = useQuery<any>(GET_VEHICLES);
   const [addVehicle] = useMutation(ADD_VEHICLE, {
     refetchQueries: [{ query: GET_VEHICLES }],
   });

@@ -6,7 +6,7 @@ import { AlertCircle, PenTool, Activity, XCircle, CheckCircle, X } from 'lucide-
 import styles from './incidents.module.css';
 
 export default function IncidentsPage() {
-  const { data, loading, error } = useQuery(GET_INCIDENTS);
+  const { data, loading, error } = useQuery<any>(GET_INCIDENTS);
   const [updateStatus] = useMutation(UPDATE_INCIDENT_STATUS, {
     refetchQueries: [{ query: GET_INCIDENTS }],
   });
@@ -23,9 +23,9 @@ export default function IncidentsPage() {
   const stats = useMemo(() => {
     if (!data) return { signale: 0, enCours: 0, resolu: 0 };
     return {
-      signale: data.incidents.filter((i: any) => i.status === 'SIGNALE').length,
-      enCours: data.incidents.filter((i: any) => i.status === 'EN_COURS').length,
-      resolu: data.incidents.filter((i: any) => i.status === 'RESOLU').length,
+      signale: (data as any).incidents.filter((i: any) => i.status === 'SIGNALE').length,
+      enCours: (data as any).incidents.filter((i: any) => i.status === 'EN_COURS').length,
+      resolu: (data as any).incidents.filter((i: any) => i.status === 'RESOLU').length,
     };
   }, [data]);
 
@@ -46,7 +46,7 @@ export default function IncidentsPage() {
     return true;
   };
 
-  const filteredIncidents = (data?.incidents || []).filter((i: any) => 
+  const filteredIncidents = (data?.incidents || []).filter((i: any) =>
     matchType(i.type, typeFilter) && matchStatus(i.status, statusFilter)
   );
 
@@ -55,7 +55,7 @@ export default function IncidentsPage() {
   };
 
   const getIconForType = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'ACCIDENT': return <AlertCircle size={20} color="#ef4444" />;
       case 'TRAVAUX': return <PenTool size={20} color="#f59e0b" />;
       case 'EMBOUTEILLAGE': return <Activity size={20} color="#ef4444" />;
@@ -65,7 +65,7 @@ export default function IncidentsPage() {
   };
 
   const formatTitle = (type: string) => {
-    switch(type) {
+    switch (type) {
       case 'ACCIDENT': return 'Accident';
       case 'TRAVAUX': return 'Travaux';
       case 'EMBOUTEILLAGE': return 'Embouteillage';
@@ -75,7 +75,7 @@ export default function IncidentsPage() {
   };
 
   const formatStatus = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'SIGNALE': return 'Signalé';
       case 'EN_COURS': return 'En cours';
       case 'RESOLU': return 'Résolu';
@@ -131,44 +131,43 @@ export default function IncidentsPage() {
       </div>
 
       <div className={styles.list}>
-        {filteredIncidents.map((incident: any) => (
+        {(data as any).incidents.map((incident: any) => (
           <div key={incident.id} className={styles.card}>
             <div className={styles.cardIcon}>
               {getIconForType(incident.type)}
             </div>
-            
+
             <div className={styles.cardContent}>
               <div className={styles.cardTop}>
                 <h3 className={styles.title}>{formatTitle(incident.type)}</h3>
-                <span className={`${styles.statusPill} ${
-                  incident.status === 'SIGNALE' ? styles.pillBlue : 
-                  incident.status === 'EN_COURS' ? styles.pillYellow : styles.pillGreen
-                }`}>
+                <span className={`${styles.statusPill} ${incident.status === 'SIGNALE' ? styles.pillBlue :
+                    incident.status === 'EN_COURS' ? styles.pillYellow : styles.pillGreen
+                  }`}>
                   {formatStatus(incident.status)}
                 </span>
                 <span className={styles.idText}>{incident.id.split('-')[0].toUpperCase()}</span>
               </div>
-              
+
               <div className={styles.locationRow}>
                 {incident.description.split('\n')[0] || incident.description}
               </div>
-              
+
               {incident.description.split('\n')[1] && (
                 <div className={styles.descRow}>
                   {incident.description.split('\n').slice(1).join(' ')}
                 </div>
               )}
-              
+
               <div className={styles.metaRow}>
                 <span>Zone : <b>Alger</b></span>
                 <span>Signalé par : <b>{incident.reportedBy}</b></span>
-                <span suppressHydrationWarning>{new Date(incident.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                <span suppressHydrationWarning>{new Date(incident.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             </div>
 
             <div className={styles.cardActions}>
               {incident.status === 'SIGNALE' && (
-                <button 
+                <button
                   className={styles.actionBtn + ' ' + styles.btnOutlineYellow}
                   onClick={() => handleUpdateStatus(incident.id, 'EN_COURS')}
                 >
@@ -176,7 +175,7 @@ export default function IncidentsPage() {
                 </button>
               )}
               {incident.status !== 'RESOLU' && (
-                <button 
+                <button
                   className={styles.actionBtn + ' ' + styles.btnOutlineGreen}
                   onClick={() => handleUpdateStatus(incident.id, 'RESOLU')}
                 >
@@ -198,15 +197,15 @@ export default function IncidentsPage() {
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
               <h3>Déclarer un incident</h3>
-              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}><X size={20}/></button>
+              <button onClick={() => setIsModalOpen(false)} className={styles.closeBtn}><X size={20} /></button>
             </div>
             <form onSubmit={handleDeclare} className={styles.form}>
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Type</label>
-                  <select 
+                  <select
                     value={newIncident.type}
-                    onChange={e => setNewIncident({...newIncident, type: e.target.value})}
+                    onChange={e => setNewIncident({ ...newIncident, type: e.target.value })}
                     className={styles.input}
                   >
                     <option value="ACCIDENT">Accident</option>
@@ -217,9 +216,9 @@ export default function IncidentsPage() {
                 </div>
                 <div className={styles.formGroup}>
                   <label>Zone</label>
-                  <select 
+                  <select
                     value={newIncident.zone}
-                    onChange={e => setNewIncident({...newIncident, zone: e.target.value})}
+                    onChange={e => setNewIncident({ ...newIncident, zone: e.target.value })}
                     className={styles.input}
                   >
                     <option value="Centre-Ville">Centre-Ville</option>
@@ -231,22 +230,22 @@ export default function IncidentsPage() {
               </div>
               <div className={styles.formGroup}>
                 <label>Localisation précise</label>
-                <input 
-                  type="text" 
-                  required 
+                <input
+                  type="text"
+                  required
                   placeholder="Rue, carrefour, km..."
                   value={newIncident.loc}
-                  onChange={e => setNewIncident({...newIncident, loc: e.target.value})}
+                  onChange={e => setNewIncident({ ...newIncident, loc: e.target.value })}
                   className={styles.input}
                 />
               </div>
               <div className={styles.formGroup}>
                 <label>Description</label>
-                <textarea 
-                  required 
+                <textarea
+                  required
                   placeholder="Décrivez l'incident en détail..."
                   value={newIncident.desc}
-                  onChange={e => setNewIncident({...newIncident, desc: e.target.value})}
+                  onChange={e => setNewIncident({ ...newIncident, desc: e.target.value })}
                   className={styles.textarea}
                   rows={4}
                 />

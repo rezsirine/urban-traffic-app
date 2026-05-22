@@ -7,13 +7,12 @@ import { io } from 'socket.io-client';
 import styles from './notifications.module.css';
 
 export default function NotificationsPage() {
-  const [mounted, setMounted] = useState(false);
-  const { data, loading, error, refetch } = useQuery(GET_NOTIFICATIONS, {
-    variables: { userId: 'Admin' },
-    fetchPolicy: 'network-only',
-    skip: !mounted
+  // Using a hardcoded userId "admin-1" for demo purposes or it should come from context
+  const { data, loading, error } = useQuery<any>(GET_NOTIFICATIONS, {
+    variables: { userId: 'admin-1' },
+    fetchPolicy: 'network-only' // always fetch latest
   });
-  
+
   const [markAsRead] = useMutation(MARK_NOTIFICATION_READ, {
     refetchQueries: [{ query: GET_NOTIFICATIONS, variables: { userId: 'Admin' } }],
   });
@@ -112,7 +111,7 @@ export default function NotificationsPage() {
                   </div>
                   <p className={styles.message}>{notif.message}</p>
                   <span className={styles.time} suppressHydrationWarning>
-                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>
@@ -138,7 +137,7 @@ export default function NotificationsPage() {
                   </div>
                   <p className={styles.message}>{notif.message}</p>
                   <span className={styles.time} suppressHydrationWarning>
-                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>

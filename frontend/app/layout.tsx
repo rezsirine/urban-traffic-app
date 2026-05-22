@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import ApolloWrapper from '../components/ApolloWrapper';
-import Sidebar from '../components/layout/Sidebar';
-import Header from '../components/layout/Header';
-import styles from './layout.module.css';
+import LayoutWrapper from './LayoutWrapper';
 
 export const metadata: Metadata = {
   title: 'UrbanFlow Traffic Management',
@@ -19,15 +17,9 @@ export default function RootLayout({
     <html lang="fr" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ApolloWrapper>
-          <div className={styles.appContainer}>
-            <Sidebar />
-            <div className={styles.mainContent}>
-              <Header />
-              <main className={styles.pageContent}>
-                {children}
-              </main>
-            </div>
-          </div>
+          <LayoutWrapper>
+            {children}
+          </LayoutWrapper>
         </ApolloWrapper>
       </body>
     </html>

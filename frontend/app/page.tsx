@@ -31,14 +31,14 @@ ChartJS.register(
 );
 
 export default function Dashboard() {
-  const { data, loading, error } = useQuery(GET_DASHBOARD_DATA);
+  const { data, loading, error } = useQuery<any>(GET_DASHBOARD_DATA);
 
   const stats = useMemo(() => {
     if (!data) return { vehicles: 0, zones: 0, incidents: 0 };
     return {
-      vehicles: data.vehicles.filter((v: any) => v.status === 'Actif').length || data.vehicles.length,
-      zones: data.zones.filter((z: any) => z.densityLevel === 'ELEVE').length || 0,
-      incidents: data.incidents.filter((i: any) => i.status === 'EN_COURS').length || data.incidents.length,
+      vehicles: (data as any).vehicles.filter((v: any) => v.status === 'Actif').length || (data as any).vehicles.length,
+      zones: (data as any).zones.filter((z: any) => z.densityLevel === 'ELEVE').length || 0,
+      incidents: (data as any).incidents.filter((i: any) => i.status === 'EN_COURS').length || (data as any).incidents.length,
     };
   }, [data]);
 
@@ -120,7 +120,7 @@ export default function Dashboard() {
               2 zone(s) rouge
             </span>
           </div>
-          <div className={styles.kpiValue}>{data.zones.length}</div>
+          <div className={styles.kpiValue}>{(data as any).zones.length}</div>
           <div className={styles.kpiLabel}>Zones surveillées</div>
         </div>
 
@@ -180,7 +180,7 @@ export default function Dashboard() {
             <a href="/incidents" className={styles.link}>Voir tout &rarr;</a>
           </div>
           <div className={styles.incidentList}>
-            {data.incidents.slice(0,3).map((incident: any) => (
+            {(data as any).incidents.slice(0,3).map((incident: any) => (
               <div key={incident.id} className={styles.incidentItem}>
                 <div className={styles.incidentIcon}>
                   <AlertTriangle size={16} color="#ef4444" />
@@ -204,7 +204,7 @@ export default function Dashboard() {
             <a href="/zones" className={styles.link}>Voir tout &rarr;</a>
           </div>
           <div className={styles.zoneList}>
-            {data.zones.slice(0, 5).map((zone: any) => (
+            {(data as any).zones.slice(0, 5).map((zone: any) => (
               <div key={zone.id} className={styles.zoneItem}>
                 <div className={styles.zoneTop}>
                   <h4>{zone.name}</h4>

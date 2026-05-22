@@ -5,14 +5,14 @@ import { GET_ZONES } from '../../lib/queries';
 import styles from './zones.module.css';
 
 export default function ZonesPage() {
-  const { data, loading, error } = useQuery(GET_ZONES);
+  const { data, loading, error } = useQuery<any>(GET_ZONES);
 
   const stats = useMemo(() => {
     if (!data) return { faible: 0, moyen: 0, eleve: 0 };
     return {
-      faible: data.zones.filter((z: any) => z.densityLevel === 'FAIBLE').length,
-      moyen: data.zones.filter((z: any) => z.densityLevel === 'MOYEN').length,
-      eleve: data.zones.filter((z: any) => z.densityLevel === 'ELEVE').length,
+      faible: (data as any).zones.filter((z: any) => z.densityLevel === 'FAIBLE').length,
+      moyen: (data as any).zones.filter((z: any) => z.densityLevel === 'MOYEN').length,
+      eleve: (data as any).zones.filter((z: any) => z.densityLevel === 'ELEVE').length,
     };
   }, [data]);
 
@@ -20,7 +20,7 @@ export default function ZonesPage() {
   if (error) return <div className={styles.error}>Erreur: {error.message}</div>;
 
   const getStatusClass = (level: string) => {
-    switch(level) {
+    switch (level) {
       case 'FAIBLE': return styles.badgeGreen;
       case 'MOYEN': return styles.badgeYellow;
       case 'ELEVE': return styles.badgeRed;
@@ -29,7 +29,7 @@ export default function ZonesPage() {
   };
 
   const getStatusLabel = (level: string) => {
-    switch(level) {
+    switch (level) {
       case 'FAIBLE': return 'Faible';
       case 'MOYEN': return 'Moyen';
       case 'ELEVE': return 'Élevé';
@@ -38,7 +38,7 @@ export default function ZonesPage() {
   };
 
   const getProgressColorClass = (level: string) => {
-    switch(level) {
+    switch (level) {
       case 'FAIBLE': return styles.bgGreen;
       case 'MOYEN': return styles.bgYellow;
       case 'ELEVE': return styles.bgRed;
@@ -47,7 +47,7 @@ export default function ZonesPage() {
   };
 
   const getProgressWidth = (level: string) => {
-    switch(level) {
+    switch (level) {
       case 'FAIBLE': return '28%';
       case 'MOYEN': return '65%';
       case 'ELEVE': return '92%';
@@ -88,7 +88,7 @@ export default function ZonesPage() {
         <div className={styles.zoneListSection}>
           <div className={styles.sectionHeader}>Zones de circulation</div>
           <div className={styles.zoneList}>
-            {data.zones.map((zone: any) => (
+            {(data as any).zones.map((zone: any) => (
               <div key={zone.id} className={styles.zoneItem}>
                 <div className={styles.zoneTop}>
                   <div className={styles.zoneTitle}>
@@ -103,15 +103,15 @@ export default function ZonesPage() {
                   </span>
                 </div>
                 <div className={styles.progressContainer}>
-                  <div 
-                    className={`${styles.progressBar} ${getProgressColorClass(zone.densityLevel)}`} 
+                  <div
+                    className={`${styles.progressBar} ${getProgressColorClass(zone.densityLevel)}`}
                     style={{ width: getProgressWidth(zone.densityLevel) }}
                   ></div>
                 </div>
                 <div className={styles.zoneFooter}>
                   <span>- véhicules</span>
                   <span>- km²</span>
-                  <span suppressHydrationWarning>Màj {new Date(zone.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                  <span suppressHydrationWarning>Màj {new Date(zone.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                 </div>
               </div>
             ))}
@@ -126,34 +126,33 @@ export default function ZonesPage() {
                 <span className={styles.liveDot}></span> Temps réel
               </span>
             </div>
-            
+
             <div className={styles.mapGrid}>
-              {data.zones.map((zone: any) => (
-                <div key={zone.id} className={`${styles.mapBlock} ${
-                  zone.densityLevel === 'ELEVE' ? styles.blockRed : 
-                  zone.densityLevel === 'MOYEN' ? styles.blockYellow : styles.blockGreen
-                }`}>
+              {(data as any).zones.map((zone: any) => (
+                <div key={zone.id} className={`${styles.mapBlock} ${zone.densityLevel === 'ELEVE' ? styles.blockRed :
+                    zone.densityLevel === 'MOYEN' ? styles.blockYellow : styles.blockGreen
+                  }`}>
                   <div className={styles.blockName}>{zone.name}</div>
                   <div className={styles.blockDensity}>{getProgressWidth(zone.densityLevel)}</div>
                 </div>
               ))}
             </div>
-            
+
             <div className={styles.mapLegend}>
               <span><span className={`${styles.dot} ${styles.dotGreen}`}></span> Faible</span>
               <span><span className={`${styles.dot} ${styles.dotYellow}`}></span> Moyen</span>
               <span><span className={`${styles.dot} ${styles.dotRed}`}></span> Élevé</span>
             </div>
           </div>
-          
+
           <div className={styles.detailCard}>
             <div className={styles.detailHeader}>
-              <h3>Détail — {data.zones[0]?.name}</h3>
-              <span className={`${styles.badge} ${getStatusClass(data.zones[0]?.densityLevel)}`}>
-                {getStatusLabel(data.zones[0]?.densityLevel)}
+              <h3>Détail — {(data as any).zones[0]?.name}</h3>
+              <span className={`${styles.badge} ${getStatusClass((data as any).zones[0]?.densityLevel)}`}>
+                {getStatusLabel((data as any).zones[0]?.densityLevel)}
               </span>
             </div>
-            
+
             <div className={styles.detailGrid}>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Surface</span>
@@ -165,12 +164,12 @@ export default function ZonesPage() {
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Densité</span>
-                <span className={styles.detailValue}>{getProgressWidth(data.zones[0]?.densityLevel)}</span>
+                <span className={styles.detailValue}>{getProgressWidth((data as any).zones[0]?.densityLevel)}</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Dernière mise à jour</span>
-                <span className={styles.detailValue} suppressHydrationWarning>
-                  {new Date(data.zones[0]?.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                <span className={styles.detailValue}>
+                  {new Date((data as any).zones[0]?.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             </div>
