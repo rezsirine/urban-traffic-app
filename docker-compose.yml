@@ -1,93 +1,128 @@
-# docker-compose.yml
+version: "3.8"
+
+networks:
+  urban-network:
+    driver: bridge
+
+volumes:
+  auth-data:
+  vehicles-data:
+  traffic-data:
+  incidents-data:
+  notifs-data:
 
 services:
-  # Bases de données
   auth-db:
     image: postgres:15-alpine
     environment:
-      {
-        POSTGRES_DB: auth_db,
-        POSTGRES_USER: postgres,
-        POSTGRES_PASSWORD: postgres,
-      }
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes: [auth-data:/var/lib/postgresql/data]
+    networks: [urban-network]
 
   vehicles-db:
     image: postgres:15-alpine
     environment:
-      {
-        POSTGRES_DB: vehicles_db,
-        POSTGRES_USER: postgres,
-        POSTGRES_PASSWORD: postgres,
-      }
+      POSTGRES_DB: vehicles_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes: [vehicles-data:/var/lib/postgresql/data]
+    networks: [urban-network]
 
   traffic-db:
     image: postgres:15-alpine
     environment:
-      {
-        POSTGRES_DB: traffic_db,
-        POSTGRES_USER: postgres,
-        POSTGRES_PASSWORD: postgres,
-      }
+      POSTGRES_DB: traffic_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes: [traffic-data:/var/lib/postgresql/data]
+    networks: [urban-network]
 
   incidents-db:
     image: postgres:15-alpine
     environment:
-      {
-        POSTGRES_DB: incidents_db,
-        POSTGRES_USER: postgres,
-        POSTGRES_PASSWORD: postgres,
-      }
+      POSTGRES_DB: incidents_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes: [incidents-data:/var/lib/postgresql/data]
+    networks: [urban-network]
 
   notifs-db:
     image: postgres:15-alpine
     environment:
-      {
-        POSTGRES_DB: notifs_db,
-        POSTGRES_USER: postgres,
-        POSTGRES_PASSWORD: postgres,
-      }
+      POSTGRES_DB: notifs_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes: [notifs-data:/var/lib/postgresql/data]
+    networks: [urban-network]
 
-  # Microservices
   auth-service:
     build: ./auth-service
-    env_file: ./auth-service/.env
     environment:
       DB_HOST: auth-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: auth_db
+      JWT_SECRET: super-secret-key-for-urban-traffic
+      PORT: 3001
     depends_on: [auth-db]
     ports: ["3001:3001"]
+    networks: [urban-network]
 
   vehicle-service:
     build: ./vehicle-service
-    env_file: ./vehicle-service/.env
     environment:
       DB_HOST: vehicles-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: vehicles_db
+      PORT: 3002
     depends_on: [vehicles-db]
     ports: ["3002:3002"]
+    networks: [urban-network]
 
   traffic-service:
     build: ./traffic-service
     environment:
       DB_HOST: traffic-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: traffic_db
+      PORT: 3003
     depends_on: [traffic-db]
     ports: ["3003:3003"]
+    networks: [urban-network]
 
   incident-service:
     build: ./incident-service
     environment:
       DB_HOST: incidents-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: incidents_db
+      PORT: 3004
     depends_on: [incidents-db]
     ports: ["3004:3004"]
+    networks: [urban-network]
 
   notif-service:
     build: ./notif-service
     environment:
       DB_HOST: notifs-db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_DATABASE: notifs_db
+      PORT: 3005
     depends_on: [notifs-db]
     ports: ["3005:3005"]
+    networks: [urban-network]
 
-  # Gateway
   gateway:
     build: ./gateway
     restart: on-failure
@@ -97,22 +132,20 @@ services:
       TRAFFIC_SERVICE_URL: http://traffic-service:3003/graphql
       INCIDENT_SERVICE_URL: http://incident-service:3004/graphql
       NOTIF_SERVICE_URL: http://notif-service:3005/graphql
+      PORT: 4000
     depends_on:
-      [
-        auth-service,
-        vehicle-service,
-        traffic-service,
-        incident-service,
-        notif-service,
-      ]
+      - auth-service
+      - vehicle-service
+      - traffic-service
+      - incident-service
+      - notif-service
     ports: ["4000:4000"]
+    networks: [urban-network]
 
-  # Frontend
   frontend:
     build: ./frontend
-    environment: { NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000/graphql }
+    environment:
+      NEXT_PUBLIC_GATEWAY_URL: http://localhost:4000/graphql
     ports: ["3000:3000"]
-
-volumes:
-  auth-data:
-  vehicles-data:
+    networks: [urban-network]
+    depends_on: [gateway]
