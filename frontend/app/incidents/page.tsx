@@ -95,13 +95,14 @@ export default function IncidentsPage() {
   const handleDeclare = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Obtenir le userId
     let userId = 'Admin';
+    let userRole = 'OPERATOR';
     const userStr = localStorage.getItem('user');
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
         userId = u.id || u.role;
+        userRole = u.role;
       } catch(e) {}
     }
 
@@ -123,21 +124,19 @@ export default function IncidentsPage() {
       return; // Stop execution if declaration fails
     }
 
-    // Envoyer une notification (Seulement si c'est un opérateur, pour notifier l'Admin)
-    if (userId !== 'Admin') {
-      try {
-        await sendNotification({
-          variables: {
-            input: {
-              title: `Nouvel incident: ${formatTitle(newIncident.type)}`,
-              message: `Signalé par ${userId} : ${newIncident.loc} - ${newIncident.desc}`,
-              userId: 'Admin'
-            }
+    // Envoyer une notification (Toujours envoyée à l'Admin pour faciliter la démo)
+    try {
+      await sendNotification({
+        variables: {
+          input: {
+            title: `Nouvel incident: ${formatTitle(newIncident.type)}`,
+            message: `Signalé par ${userId} : ${newIncident.loc} - ${newIncident.desc}`,
+            userId: 'Admin'
           }
-        });
-      } catch (err) {
-        console.error("Error sending notification:", err);
-      }
+        }
+      });
+    } catch (err) {
+      console.error("Error sending notification:", err);
     }
 
     setIsModalOpen(false);

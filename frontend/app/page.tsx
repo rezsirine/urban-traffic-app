@@ -42,7 +42,7 @@ export default function Dashboard() {
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
-        uid = parsed.id || parsed.role;
+        uid = parsed.role === 'ADMIN' ? 'Admin' : (parsed.id || parsed.role);
       } catch (e) {
         console.error(e);
       }

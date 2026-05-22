@@ -16,7 +16,7 @@ export default function NotificationsPage() {
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
-        uid = u.id || u.role;
+        uid = u.role === 'ADMIN' ? 'Admin' : (u.id || u.role);
       } catch(e) {}
     }
     setUserId(uid);
