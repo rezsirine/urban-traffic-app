@@ -1,8 +1,8 @@
 'use client';
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { useQuery } from '@apollo/client/react';
-import { GET_VEHICLE, GET_VEHICLE_HISTORY } from '../../../lib/queries';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { GET_VEHICLE, GET_VEHICLE_HISTORY, RECORD_POSITION } from '../../../lib/queries';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import styles from './vehicle-detail.module.css';
@@ -23,8 +23,24 @@ export default function VehicleDetailPage() {
   const { data: historyData, loading: historyLoading } = useQuery(GET_VEHICLE_HISTORY, {
     variables: { vehicleId: id },
     skip: !id,
+    skip: !id,
     pollInterval: 10000 // Poll every 10s for new positions
   });
+
+  const [recordPosition, { loading: recording }] = useMutation(RECORD_POSITION, {
+    refetchQueries: [{ query: GET_VEHICLE_HISTORY, variables: { vehicleId: id } }]
+  });
+
+  const handleSimulate = async () => {
+    const lat = 36.8065 + (Math.random() * 0.05 - 0.025);
+    const lng = 10.1815 + (Math.random() * 0.05 - 0.025);
+    try {
+      await recordPosition({ variables: { input: { vehicleId: id, lat, lng } } });
+    } catch (e) {
+      console.error(e);
+      alert('Erreur lors de la simulation');
+    }
+  };
 
   if (vehicleLoading || historyLoading) return <div className={styles.loading}>Chargement des détails...</div>;
   if (!vehicleData?.vehicle) return <div className={styles.error}>Véhicule introuvable.</div>;
@@ -93,6 +109,15 @@ export default function VehicleDetailPage() {
                 </div>
               </>
             )}
+
+            <button 
+              className={styles.simulateBtn} 
+              onClick={handleSimulate}
+              disabled={recording}
+              style={{ marginTop: '1rem', width: '100%', padding: '0.75rem', background: '#1A56DB', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              {recording ? 'Simulation...' : 'Simuler la position'}
+            </button>
           </div>
         </div>
 

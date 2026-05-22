@@ -67,6 +67,17 @@ export const GET_VEHICLE_HISTORY = gql`
   }
 `;
 
+export const RECORD_POSITION = gql`
+  mutation RecordPosition($input: RecordPositionInput!) {
+    recordPosition(input: $input) {
+      id
+      lat
+      lng
+      timestamp
+    }
+  }
+`;
+
 export const GET_ZONES = gql`
   query GetZones {
     zones {
