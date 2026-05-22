@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { GET_INCIDENTS, UPDATE_INCIDENT_STATUS, DECLARE_INCIDENT } from '../../lib/queries';
+import { GET_INCIDENTS, UPDATE_INCIDENT_STATUS, DECLARE_INCIDENT, SEND_NOTIFICATION } from '../../lib/queries';
 import { AlertCircle, PenTool, Activity, XCircle, CheckCircle, X } from 'lucide-react';
 import styles from './incidents.module.css';
 
@@ -13,12 +13,14 @@ export default function IncidentsPage() {
   const [declareIncident] = useMutation(DECLARE_INCIDENT, {
     refetchQueries: [{ query: GET_INCIDENTS }],
   });
+  const [sendNotification] = useMutation(SEND_NOTIFICATION);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newIncident, setNewIncident] = useState({ type: 'ACCIDENT', zone: 'Centre-Ville', loc: '', desc: '' });
 
   const [typeFilter, setTypeFilter] = useState('Tous les types');
   const [statusFilter, setStatusFilter] = useState('Tous les statuts');
+  const [searchTerm, setSearchTerm] = useState('');
 
   const stats = useMemo(() => {
     if (!data) return { signale: 0, enCours: 0, resolu: 0 };
@@ -46,9 +48,16 @@ export default function IncidentsPage() {
     return true;
   };
 
-  const filteredIncidents = (data?.incidents || []).filter((i: any) =>
-    matchType(i.type, typeFilter) && matchStatus(i.status, statusFilter)
-  );
+  const filteredIncidents = (data?.incidents || []).filter((i: any) => {
+    const matchesType = matchType(i.type, typeFilter);
+    const matchesStatus = matchStatus(i.status, statusFilter);
+    const matchesSearch = searchTerm === '' || 
+      i.description.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      i.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      i.reportedBy.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    return matchesType && matchesStatus && matchesSearch;
+  });
 
   const handleUpdateStatus = (id: string, status: string) => {
     updateStatus({ variables: { id, status } });
@@ -85,17 +94,50 @@ export default function IncidentsPage() {
 
   const handleDeclare = async (e: React.FormEvent) => {
     e.preventDefault();
-    await declareIncident({
-      variables: {
-        input: {
-          type: newIncident.type,
-          description: newIncident.loc + '\n' + newIncident.desc,
-          lat: 0,
-          lng: 0,
-          reportedBy: 'Admin' // En réalité, l'ID de l'utilisateur connecté
+    
+    // Obtenir le userId
+    let userId = 'Admin';
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        userId = u.id || u.role;
+      } catch(e) {}
+    }
+
+    try {
+      await declareIncident({
+        variables: {
+          input: {
+            type: newIncident.type,
+            description: newIncident.loc + '\n' + newIncident.desc,
+            lat: 0,
+            lng: 0,
+            reportedBy: userId
+          }
         }
-      }
-    });
+      });
+    } catch (err: any) {
+      console.error("Error declaring incident:", err);
+      alert("Erreur lors de la déclaration de l'incident: " + err.message);
+      return; // Stop execution if declaration fails
+    }
+
+    // Envoyer une notification pour l'incident créé
+    try {
+      await sendNotification({
+        variables: {
+          input: {
+            title: `Nouvel incident: ${formatTitle(newIncident.type)}`,
+            message: `${newIncident.loc} - ${newIncident.desc}`,
+            userId: userId
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Error sending notification:", err);
+    }
+
     setIsModalOpen(false);
     setNewIncident({ type: 'ACCIDENT', zone: 'Centre-Ville', loc: '', desc: '' });
   };
@@ -107,6 +149,15 @@ export default function IncidentsPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.filters}>
+          <div className={styles.searchBar}>
+            <input 
+              type="text" 
+              placeholder="Rechercher (ex: Embouteillage)..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
           <select className={styles.select} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
             <option value="Tous les types">Tous les types</option>
             <option value="Accident">Accident</option>
@@ -131,7 +182,7 @@ export default function IncidentsPage() {
       </div>
 
       <div className={styles.list}>
-        {(data as any).incidents.map((incident: any) => (
+        {filteredIncidents.map((incident: any) => (
           <div key={incident.id} className={styles.card}>
             <div className={styles.cardIcon}>
               {getIconForType(incident.type)}

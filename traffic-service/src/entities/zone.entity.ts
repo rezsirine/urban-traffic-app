@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
+import GraphQLJSON from 'graphql-type-json';
 
 export enum TrafficLevel {
   FAIBLE = 'FAIBLE',
@@ -20,9 +21,9 @@ export class Zone {
   @Column()
   name: string;
 
-  @Field()
+  @Field(() => GraphQLJSON)
   @Column('json')
-  bounds: string; // Storing as JSON string of coordinates for simplicity
+  bounds: any; // Store as JSON array of coordinates
 
   @Field(() => TrafficLevel)
   @Column({ type: 'enum', enum: TrafficLevel, default: TrafficLevel.FAIBLE })

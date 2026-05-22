@@ -4,7 +4,12 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@apollo/client/react';
 import { GET_VEHICLE, GET_VEHICLE_HISTORY } from '../../../lib/queries';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import styles from './vehicle-detail.module.css';
+
+const VehicleMap = dynamic(() => import('../../../components/VehicleMap'), {
+  ssr: false,
+});
 
 export default function VehicleDetailPage() {
   const params = useParams();
@@ -96,18 +101,8 @@ export default function VehicleDetailPage() {
             <h3>Position GPS en temps réel</h3>
             <span className={styles.liveIndicator}><span className={styles.liveDot}></span> Live</span>
           </div>
-          <div className={styles.mapPlaceholder}>
-            {/* Simple Grid Background for Mock Map */}
-            {latestPos ? (
-              <div className={styles.mockMap}>
-                <div className={styles.vehicleMarker}></div>
-                <div className={styles.coordOverlay}>
-                  {Number(latestPos.lat).toFixed(4)}N, {Number(latestPos.lng).toFixed(4)}E
-                </div>
-              </div>
-            ) : (
-              <div className={styles.noData}>Aucune donnée GPS disponible</div>
-            )}
+          <div className={styles.mapPlaceholder} style={{ background: 'none', border: 'none', padding: 0 }}>
+            <VehicleMap latestPos={latestPos} history={history} />
           </div>
         </div>
       </div>

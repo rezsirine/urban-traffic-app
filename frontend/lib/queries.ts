@@ -139,6 +139,19 @@ export const MARK_NOTIFICATION_READ = gql`
   }
 `;
 
+export const SEND_NOTIFICATION = gql`
+  mutation SendNotification($input: SendNotificationInput!) {
+    sendNotification(input: $input) {
+      id
+      title
+      message
+      userId
+      isRead
+      createdAt
+    }
+  }
+`;
+
 export const LOGIN_MUTATION = gql`
   mutation Login($input: LoginInput!) {
     login(input: $input) {

@@ -42,7 +42,7 @@ async function seed() {
     input: {
       email: "admin@urbanflow.dz",
       password: "password",
-      name: "Mohamed Amine",
+      name: "FullName",
       role: "ADMIN"
     }
   });

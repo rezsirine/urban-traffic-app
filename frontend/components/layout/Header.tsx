@@ -11,18 +11,32 @@ import styles from './Header.module.css';
 export default function Header() {
   const pathname = usePathname();
   const [mounted, setMounted] = React.useState(false);
+  const [userId, setUserId] = React.useState('Admin');
+
+  React.useEffect(() => {
+    let uid = 'Admin';
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        uid = u.id || u.role; // using role if id is somehow missing, but normally u.id
+      } catch(e) {}
+    }
+    setUserId(uid);
+    setMounted(true);
+  }, []);
 
   const { data, refetch } = useQuery(GET_NOTIFICATIONS, {
-    variables: { userId: 'Admin' }, // Mocking user auth for now
-    skip: !mounted,
+    variables: { userId },
+    skip: !mounted || !userId,
   });
 
   React.useEffect(() => {
-    setMounted(true);
+    if (!mounted || !userId) return;
     
     // Connect to WebSockets for real-time notifications
     const socket = io('http://localhost:3005');
-    socket.on('notification_Admin', (newNotif) => {
+    socket.on(`notification_${userId}`, (newNotif) => {
       // Refetch when a new notification comes in
       refetch();
     });
@@ -30,7 +44,7 @@ export default function Header() {
     return () => {
       socket.disconnect();
     };
-  }, [refetch]);
+  }, [mounted, userId, refetch]);
   
   const unreadCount = data?.notifications?.filter((n: any) => !n.isRead).length || 0;
 

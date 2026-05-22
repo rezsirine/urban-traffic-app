@@ -17,7 +17,7 @@ export default function RegisterPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const [register] = useMutation(REGISTER_MUTATION);
+  const [register] = useMutation<{ register: { token: string; user: any } }>(REGISTER_MUTATION);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +134,7 @@ export default function RegisterPage() {
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e293b", marginBottom: "6px" }}>Prénom</label>
                 <input
                   type="text" value={firstName} onChange={e => setFirstName(e.target.value)} required
-                  placeholder="Mohamed"
+                  placeholder="Nom"
                   style={inputStyle}
                   onFocus={e => e.target.style.borderColor = "#1c5dfd"}
                   onBlur={e => e.target.style.borderColor = "#e2e8f0"}
@@ -144,7 +144,7 @@ export default function RegisterPage() {
                 <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e293b", marginBottom: "6px" }}>Nom</label>
                 <input
                   type="text" value={lastName} onChange={e => setLastName(e.target.value)} required
-                  placeholder="Amine"
+                  placeholder="Prenom"
                   style={inputStyle}
                   onFocus={e => e.target.style.borderColor = "#1c5dfd"}
                   onBlur={e => e.target.style.borderColor = "#e2e8f0"}

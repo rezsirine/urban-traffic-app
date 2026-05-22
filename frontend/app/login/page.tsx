@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const [login] = useMutation(LOGIN_MUTATION);
+  const [login] = useMutation<{ login: { token: string; user: any } }>(LOGIN_MUTATION);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

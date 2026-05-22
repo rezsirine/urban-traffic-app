@@ -17,10 +17,23 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   useEffect(() => {
     setIsClient(true);
     const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
     setHasToken(!!token);
 
     if (!token && !isAuthPage) {
       router.push("/login");
+      return;
+    }
+
+    if (userStr && !isAuthPage) {
+      try {
+        const user = JSON.parse(userStr);
+        if (user.role === 'OPERATOR' && (pathname === '/' || pathname.startsWith('/vehicles'))) {
+          router.push('/incidents');
+        }
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, [isAuthPage, router, pathname]);
 

@@ -1,18 +1,23 @@
 'use client';
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client/react';
+import dynamic from 'next/dynamic';
 import { GET_ZONES } from '../../lib/queries';
 import styles from './zones.module.css';
+
+const ZonesMap = dynamic(() => import('../../components/ZonesMap'), {
+  ssr: false,
+});
 
 export default function ZonesPage() {
   const { data, loading, error } = useQuery<any>(GET_ZONES);
 
   const stats = useMemo(() => {
-    if (!data) return { faible: 0, moyen: 0, eleve: 0 };
+    const zones = data?.zones || [];
     return {
-      faible: (data as any).zones.filter((z: any) => z.densityLevel === 'FAIBLE').length,
-      moyen: (data as any).zones.filter((z: any) => z.densityLevel === 'MOYEN').length,
-      eleve: (data as any).zones.filter((z: any) => z.densityLevel === 'ELEVE').length,
+      faible: zones.filter((z: any) => z.densityLevel === 'FAIBLE').length,
+      moyen: zones.filter((z: any) => z.densityLevel === 'MOYEN').length,
+      eleve: zones.filter((z: any) => z.densityLevel === 'ELEVE').length,
     };
   }, [data]);
 
@@ -88,7 +93,7 @@ export default function ZonesPage() {
         <div className={styles.zoneListSection}>
           <div className={styles.sectionHeader}>Zones de circulation</div>
           <div className={styles.zoneList}>
-            {(data as any).zones.map((zone: any) => (
+            {(data?.zones || []).map((zone: any) => (
               <div key={zone.id} className={styles.zoneItem}>
                 <div className={styles.zoneTop}>
                   <div className={styles.zoneTitle}>
@@ -109,9 +114,7 @@ export default function ZonesPage() {
                   ></div>
                 </div>
                 <div className={styles.zoneFooter}>
-                  <span>- véhicules</span>
-                  <span>- km²</span>
-                  <span suppressHydrationWarning>Màj {new Date(zone.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  <span suppressHydrationWarning>Màj {(zone.createdAt) ? new Date(zone.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}</span>
                 </div>
               </div>
             ))}
@@ -119,57 +122,36 @@ export default function ZonesPage() {
         </div>
 
         <div className={styles.mapSection}>
-          <div className={styles.mapCard}>
+          <div className={styles.mapCard} style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '500px' }}>
             <div className={styles.mapHeader}>
               <h3>Carte de densité — Alger</h3>
               <span className={styles.realtimeBadge}>
                 <span className={styles.liveDot}></span> Temps réel
               </span>
             </div>
-
-            <div className={styles.mapGrid}>
-              {(data as any).zones.map((zone: any) => (
-                <div key={zone.id} className={`${styles.mapBlock} ${zone.densityLevel === 'ELEVE' ? styles.blockRed :
-                    zone.densityLevel === 'MOYEN' ? styles.blockYellow : styles.blockGreen
-                  }`}>
-                  <div className={styles.blockName}>{zone.name}</div>
-                  <div className={styles.blockDensity}>{getProgressWidth(zone.densityLevel)}</div>
-                </div>
-              ))}
-            </div>
-
-            <div className={styles.mapLegend}>
-              <span><span className={`${styles.dot} ${styles.dotGreen}`}></span> Faible</span>
-              <span><span className={`${styles.dot} ${styles.dotYellow}`}></span> Moyen</span>
-              <span><span className={`${styles.dot} ${styles.dotRed}`}></span> Élevé</span>
+            
+            <div style={{ flex: 1, minHeight: '400px' }}>
+              <ZonesMap zones={data?.zones || []} />
             </div>
           </div>
 
           <div className={styles.detailCard}>
             <div className={styles.detailHeader}>
-              <h3>Détail — {(data as any).zones[0]?.name}</h3>
-              <span className={`${styles.badge} ${getStatusClass((data as any).zones[0]?.densityLevel)}`}>
-                {getStatusLabel((data as any).zones[0]?.densityLevel)}
+              <h3>Détail — {(data?.zones || [])[0]?.name || 'Aucune zone'}</h3>
+              <span className={`${styles.badge} ${getStatusClass((data?.zones || [])[0]?.densityLevel)}`}>
+                {getStatusLabel((data?.zones || [])[0]?.densityLevel)}
               </span>
             </div>
 
             <div className={styles.detailGrid}>
               <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Surface</span>
-                <span className={styles.detailValue}>- km²</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Véhicules</span>
-                <span className={styles.detailValue}>-</span>
-              </div>
-              <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Densité</span>
-                <span className={styles.detailValue}>{getProgressWidth((data as any).zones[0]?.densityLevel)}</span>
+                <span className={styles.detailValue}>{getProgressWidth((data?.zones || [])[0]?.densityLevel)}</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Dernière mise à jour</span>
                 <span className={styles.detailValue}>
-                  {new Date((data as any).zones[0]?.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {(data?.zones || [])[0]?.createdAt ? new Date((data?.zones || [])[0]?.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
                 </span>
               </div>
             </div>

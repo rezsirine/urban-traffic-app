@@ -7,23 +7,40 @@ import { io } from 'socket.io-client';
 import styles from './notifications.module.css';
 
 export default function NotificationsPage() {
-  // Using a hardcoded userId "admin-1" for demo purposes or it should come from context
+  const [userId, setUserId] = useState<string>('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    let uid = 'Admin';
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        uid = u.id || u.role;
+      } catch(e) {}
+    }
+    setUserId(uid);
+    setMounted(true);
+  }, []);
+
   const { data, loading, error, refetch } = useQuery<any>(GET_NOTIFICATIONS, {
-    variables: { userId: 'admin-1' },
+    variables: { userId },
+    skip: !mounted || !userId,
     fetchPolicy: 'network-only' // always fetch latest
   });
 
   const [markAsRead] = useMutation(MARK_NOTIFICATION_READ, {
-    refetchQueries: [{ query: GET_NOTIFICATIONS, variables: { userId: 'Admin' } }],
+    refetchQueries: [{ query: GET_NOTIFICATIONS, variables: { userId } }],
   });
 
   useEffect(() => {
+    if (!mounted || !userId) return;
     const socket = io('http://localhost:3005');
-    socket.on('notification_Admin', () => {
+    socket.on(`notification_${userId}`, () => {
       refetch();
     });
     return () => { socket.disconnect(); };
-  }, [refetch]);
+  }, [mounted, userId, refetch]);
 
   const unreadNotifs = useMemo(() => {
     return data?.notifications?.filter((n: any) => !n.isRead) || [];
@@ -110,7 +127,8 @@ export default function NotificationsPage() {
                   </div>
                   <p className={styles.message}>{notif.message}</p>
                   <span className={styles.time} suppressHydrationWarning>
-                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(notif.createdAt).toLocaleDateString() === new Date().toLocaleDateString() ? 'Aujourd\'hui à ' : new Date(notif.createdAt).toLocaleDateString() + ' à '} 
+                    {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>
@@ -136,7 +154,8 @@ export default function NotificationsPage() {
                   </div>
                   <p className={styles.message}>{notif.message}</p>
                   <span className={styles.time} suppressHydrationWarning>
-                    Aujourd'hui à {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(notif.createdAt).toLocaleDateString() === new Date().toLocaleDateString() ? 'Aujourd\'hui à ' : new Date(notif.createdAt).toLocaleDateString() + ' à '} 
+                    {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>

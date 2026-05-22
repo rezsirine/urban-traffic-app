@@ -1,7 +1,7 @@
 'use client';
 import React, { useMemo } from 'react';
 import { useQuery } from '@apollo/client/react';
-import { GET_DASHBOARD_DATA } from '../lib/queries';
+import { GET_DASHBOARD_DATA, GET_NOTIFICATIONS } from '../lib/queries';
 import { Car, Map, AlertTriangle, Bell, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -33,14 +33,43 @@ ChartJS.register(
 export default function Dashboard() {
   const { data, loading, error } = useQuery<any>(GET_DASHBOARD_DATA);
 
+  const [userId, setUserId] = React.useState<string>('');
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    let uid = 'Admin';
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        uid = parsed.id || parsed.role;
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    setUserId(uid);
+    setMounted(true);
+  }, []);
+
+  const { data: notifData } = useQuery(GET_NOTIFICATIONS, {
+    variables: { userId },
+    skip: !mounted || !userId,
+  });
+
   const stats = useMemo(() => {
-    if (!data) return { vehicles: 0, zones: 0, incidents: 0 };
+    if (!data) return { vehicles: 0, zones: 0, incidents: 0, unreadNotifs: 0 };
+    const vehicles = data?.vehicles || [];
+    const zones = data?.zones || [];
+    const incidents = data?.incidents || [];
+    const unreadNotifs = notifData?.notifications?.filter((n: any) => !n.isRead).length || 0;
+    
     return {
-      vehicles: (data as any).vehicles.filter((v: any) => v.status === 'Actif').length || (data as any).vehicles.length,
-      zones: (data as any).zones.filter((z: any) => z.densityLevel === 'ELEVE').length || 0,
-      incidents: (data as any).incidents.filter((i: any) => i.status === 'EN_COURS').length || (data as any).incidents.length,
+      vehicles: vehicles.filter((v: any) => v.status === 'Actif').length || vehicles.length,
+      zones: zones.filter((z: any) => z.densityLevel === 'ELEVE').length || 0,
+      incidents: incidents.filter((i: any) => i.status === 'EN_COURS').length || incidents.length,
+      unreadNotifs,
     };
-  }, [data]);
+  }, [data, notifData]);
 
   const lineChartData = {
     labels: ['06h', '07h', '08h', '09h', '10h', '11h', '12h', '13h', '14h'],
@@ -70,16 +99,31 @@ export default function Dashboard() {
     ],
   };
 
-  const barChartData = {
-    labels: ['Accident', 'Travaux', 'Route fermée', 'Embouteillage'],
-    datasets: [
-      {
-        data: [12, 7, 4, 18],
-        backgroundColor: ['#1A56DB', '#f59e0b', '#ef4444', '#8b5cf6'],
-        borderRadius: 4,
-      }
-    ]
-  };
+  const barChartData = useMemo(() => {
+    if (!data || !data.incidents) {
+      return {
+        labels: ['Accident', 'Travaux', 'Route fermée', 'Embouteillage'],
+        datasets: [{ data: [0, 0, 0, 0], backgroundColor: ['#1A56DB', '#f59e0b', '#ef4444', '#8b5cf6'], borderRadius: 4 }]
+      };
+    }
+    
+    const incidents = data.incidents;
+    const accident = incidents.filter((i: any) => i.type === 'ACCIDENT').length;
+    const travaux = incidents.filter((i: any) => i.type === 'TRAVAUX').length;
+    const route = incidents.filter((i: any) => i.type === 'ROUTE_FERMEE').length;
+    const embout = incidents.filter((i: any) => i.type === 'EMBOUTEILLAGE').length;
+
+    return {
+      labels: ['Accident', 'Travaux', 'Route fermée', 'Embouteillage'],
+      datasets: [
+        {
+          data: [accident, travaux, route, embout],
+          backgroundColor: ['#1A56DB', '#f59e0b', '#ef4444', '#8b5cf6'],
+          borderRadius: 4,
+        }
+      ]
+    };
+  }, [data]);
 
   const chartOptions = {
     responsive: true,
@@ -121,7 +165,7 @@ export default function Dashboard() {
               2 zone(s) rouge
             </span>
           </div>
-          <div className={styles.kpiValue}>{(data as any).zones?.length ?? 0}</div>
+          <div className={styles.kpiValue}>{data?.zones?.length ?? 0}</div>
           <div className={styles.kpiLabel}>Zones surveillées</div>
         </div>
 
@@ -143,11 +187,11 @@ export default function Dashboard() {
             <div className={styles.iconWrapper} style={{ color: '#ef4444', backgroundColor: '#fef2f2' }}>
               <Bell size={20} />
             </div>
-            <span className={styles.kpiTrend} style={{ color: '#10b981' }}>
-              <ArrowUpRight size={16} /> 3 prioritaires
+            <span className={styles.kpiTrend} style={{ color: '#6b7280' }}>
+              Temps réel
             </span>
           </div>
-          <div className={styles.kpiValue}>3</div>
+          <div className={styles.kpiValue}>{stats.unreadNotifs}</div>
           <div className={styles.kpiLabel}>Notifications non lues</div>
         </div>
       </div>
@@ -181,7 +225,7 @@ export default function Dashboard() {
             <a href="/incidents" className={styles.link}>Voir tout &rarr;</a>
           </div>
           <div className={styles.incidentList}>
-            {(data as any).incidents.slice(0,3).map((incident: any) => (
+            {((data as any)?.incidents || []).slice(0,3).map((incident: any) => (
               <div key={incident.id} className={styles.incidentItem}>
                 <div className={styles.incidentIcon}>
                   <AlertTriangle size={16} color="#ef4444" />
@@ -191,8 +235,8 @@ export default function Dashboard() {
                     <h4>{incident.type}</h4>
                     <span className={styles.badge}>{incident.status}</span>
                   </div>
-                  <p>{incident.location}</p>
-                  <span>{new Date(incident.createdAt).toLocaleTimeString()}</span>
+                  <p>{incident.description ? incident.description.split('\n')[0] : 'Sans description'}</p>
+                  <span>{incident.createdAt ? new Date(incident.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                 </div>
               </div>
             ))}
@@ -205,7 +249,7 @@ export default function Dashboard() {
             <a href="/zones" className={styles.link}>Voir tout &rarr;</a>
           </div>
           <div className={styles.zoneList}>
-            {(data as any).zones.slice(0, 5).map((zone: any) => {
+            {(data?.zones || []).slice(0, 5).map((zone: any) => {
               const level = (zone.densityLevel || zone.level || 'NORMAL').toLowerCase();
               const displayLevel = (zone.densityLevel || zone.level || 'NORMAL');
               return (
