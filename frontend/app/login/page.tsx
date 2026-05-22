@@ -2,178 +2,216 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Activity, ArrowRight, ShieldCheck } from "lucide-react";
+import { useMutation } from "@apollo/client/react";
 import Link from "next/link";
+import { LOGIN_MUTATION } from "../../lib/queries";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@urbanflow.dz");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [login] = useMutation(LOGIN_MUTATION);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
-    // Simulate API call and redirect to dashboard
-    setTimeout(() => {
+    setErrorMessage("");
+    try {
+      const { data } = await login({ variables: { input: { email, password } } });
+      if (data?.login?.token) {
+        localStorage.setItem("token", data.login.token);
+        localStorage.setItem("user", JSON.stringify(data.login.user));
+        // Redirect based on role
+        const role = data.login.user?.role;
+        if (role === "ADMIN") {
+          router.push("/");
+        } else if (role === "OPERATOR") {
+          router.push("/incidents");
+        } else {
+          router.push("/");
+        }
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Identifiants incorrects.");
+    } finally {
       setIsLoading(false);
-      router.push("/");
-    }, 800);
+    }
   };
 
   return (
-    <div className="min-h-screen flex w-full">
-      {/* Left Panel - Hidden on mobile */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 p-12 bg-gradient-to-br from-[#1a438e] to-[#14326d] text-white">
+    <div style={{ display: "flex", minHeight: "100vh", fontFamily: "'Inter', sans-serif" }}>
+      {/* Left blue panel */}
+      <div style={{
+        width: "50%", display: "flex", flexDirection: "column", justifyContent: "space-between",
+        padding: "48px", background: "linear-gradient(135deg, #1a438e 0%, #14326d 100%)", color: "#fff"
+      }}>
         <div>
-          <div className="flex items-center gap-3 font-semibold text-xl mb-24">
-            <div className="bg-white/10 p-2 rounded-lg backdrop-blur-sm border border-white/20">
-              <Activity className="w-6 h-6 text-white" />
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "96px" }}>
+            <div style={{
+              background: "rgba(255,255,255,0.15)", borderRadius: "10px", padding: "8px",
+              border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center"
+            }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M4 12h4l2-6 4 12 2-6h4" />
+              </svg>
             </div>
-            UrbanFlow
+            <span style={{ fontWeight: 700, fontSize: "20px" }}>UrbanFlow</span>
           </div>
 
-          <div className="max-w-md">
-            <h1 className="text-5xl font-bold leading-tight mb-6">
-              Supervision
-              <br />
-              du trafic urbain
-              <br />
-              en temps réel
-            </h1>
-            <p className="text-blue-100/80 text-lg mb-12">
-              Plateforme intelligente de gestion du trafic — supervision des
-              véhicules, détection des incidents et analyse de circulation.
-            </p>
+          {/* Hero */}
+          <h1 style={{ fontSize: "48px", fontWeight: 800, lineHeight: 1.15, marginBottom: "24px" }}>
+            Supervision<br />du trafic urbain<br />en temps réel
+          </h1>
+          <p style={{ color: "rgba(219,234,254,0.85)", fontSize: "16px", lineHeight: 1.6, marginBottom: "48px" }}>
+            Plateforme intelligente de gestion du trafic — supervision des véhicules, détection des incidents et analyse de circulation.
+          </p>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 p-5 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition">
-                <div className="text-3xl font-bold mb-1">247</div>
-                <div className="text-sm text-blue-200">Véhicules actifs</div>
+          {/* Stats grid */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+            {[
+              { val: "247", label: "Véhicules actifs" },
+              { val: "18", label: "Zones surveillées" },
+              { val: "1 284", label: "Incidents résolus" },
+              { val: "99.9%", label: "Uptime" },
+            ].map((s) => (
+              <div key={s.label} style={{
+                background: "rgba(255,255,255,0.1)", borderRadius: "14px", padding: "20px",
+                border: "1px solid rgba(255,255,255,0.12)"
+              }}>
+                <div style={{ fontSize: "28px", fontWeight: 800, marginBottom: "4px" }}>{s.val}</div>
+                <div style={{ fontSize: "13px", color: "rgba(191,219,254,0.9)" }}>{s.label}</div>
               </div>
-              <div className="bg-white/10 p-5 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition">
-                <div className="text-3xl font-bold mb-1">18</div>
-                <div className="text-sm text-blue-200">Zones surveillées</div>
-              </div>
-              <div className="bg-white/10 p-5 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition">
-                <div className="text-3xl font-bold mb-1">1,284</div>
-                <div className="text-sm text-blue-200">Incidents résolus</div>
-              </div>
-              <div className="bg-white/10 p-5 rounded-xl backdrop-blur-sm border border-white/10 hover:bg-white/15 transition">
-                <div className="text-3xl font-bold mb-1">99.9%</div>
-                <div className="text-sm text-blue-200">Uptime</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="text-blue-300 text-sm">
+        <p style={{ fontSize: "13px", color: "rgba(147,197,253,0.7)" }}>
           © 2026 UrbanFlow — Système de Gestion du Trafic Urbain
-        </div>
+        </p>
       </div>
 
-      {/* Right Panel */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#f8fafc]">
-        <div className="w-full max-w-md">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">
-              Connexion
-            </h2>
-            <p className="text-slate-500">
-              Accédez à votre espace de supervision
-            </p>
-          </div>
+      {/* Right white panel */}
+      <div style={{
+        width: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "48px", background: "#f8fafc"
+      }}>
+        <div style={{ width: "100%", maxWidth: "420px" }}>
+          <h2 style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", marginBottom: "6px" }}>Connexion</h2>
+          <p style={{ color: "#64748b", fontSize: "15px", marginBottom: "32px" }}>Accédez à votre espace de supervision</p>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          {errorMessage && (
+            <div style={{
+              background: "#fef2f2", border: "1px solid #fecaca", borderRadius: "12px",
+              padding: "12px 16px", color: "#dc2626", fontSize: "14px", fontWeight: 600, marginBottom: "20px"
+            }}>
+              {errorMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
             <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e293b", marginBottom: "6px" }}>
                 Adresse e-mail
               </label>
               <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#1c5dfd] focus:ring-2 focus:ring-blue-200 outline-none transition text-slate-700"
-                required
+                type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
+                style={{
+                  width: "100%", padding: "12px 16px", borderRadius: "10px",
+                  border: "1.5px solid #e2e8f0", outline: "none", fontSize: "15px",
+                  color: "#1e293b", background: "#fff", boxSizing: "border-box",
+                  transition: "border-color 0.2s"
+                }}
+                placeholder="votre@email.com"
+                onFocus={e => e.target.style.borderColor = "#1c5dfd"}
+                onBlur={e => e.target.style.borderColor = "#e2e8f0"}
               />
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-semibold text-slate-700 mb-2"
-              >
+              <label style={{ display: "block", fontSize: "14px", fontWeight: 600, color: "#1e293b", marginBottom: "6px" }}>
                 Mot de passe
               </label>
               <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-slate-200 focus:border-[#1c5dfd] focus:ring-2 focus:ring-blue-200 outline-none transition text-slate-700"
-                required
+                type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
+                placeholder="••••••••"
+                style={{
+                  width: "100%", padding: "12px 16px", borderRadius: "10px",
+                  border: "1.5px solid #e2e8f0", outline: "none", fontSize: "15px",
+                  color: "#1e293b", background: "#fff", boxSizing: "border-box",
+                  transition: "border-color 0.2s"
+                }}
+                onFocus={e => e.target.style.borderColor = "#1c5dfd"}
+                onBlur={e => e.target.style.borderColor = "#e2e8f0"}
               />
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <label className="flex items-center gap-2 cursor-pointer">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
                 <input
-                  type="checkbox"
-                  className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 accent-pink-500"
-                  defaultChecked
+                  type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)}
+                  style={{ width: "16px", height: "16px", accentColor: "#1c5dfd" }}
                 />
-                <span className="text-sm text-slate-600">
-                  Se souvenir de moi
-                </span>
+                <span style={{ fontSize: "14px", color: "#475569" }}>Se souvenir de moi</span>
               </label>
-              <Link
-                href="/reset-password"
-                className="text-sm font-semibold text-[#1c5dfd] hover:text-blue-700 transition"
-              >
+              <Link href="/reset-password" style={{ fontSize: "14px", fontWeight: 600, color: "#1c5dfd", textDecoration: "none" }}>
                 Mot de passe oublié ?
               </Link>
             </div>
 
             <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-[#1c5dfd] text-white rounded-lg py-3.5 font-semibold mt-4 flex items-center justify-center gap-2 hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition disabled:opacity-70"
+              type="submit" disabled={isLoading}
+              style={{
+                width: "100%", padding: "14px", background: isLoading ? "#6b9efa" : "#1c5dfd",
+                color: "#fff", border: "none", borderRadius: "12px", fontSize: "15px",
+                fontWeight: 700, cursor: isLoading ? "not-allowed" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                transition: "background 0.2s"
+              }}
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span style={{
+                  width: "18px", height: "18px", border: "2.5px solid rgba(255,255,255,0.3)",
+                  borderTop: "2.5px solid #fff", borderRadius: "50%", display: "inline-block",
+                  animation: "spin 0.8s linear infinite"
+                }} />
               ) : (
                 <>
-                  <ArrowRight className="w-5 h-5" />
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                  </svg>
                   Se connecter
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-8 text-center text-sm text-slate-500">
+          <p style={{ textAlign: "center", marginTop: "28px", fontSize: "14px", color: "#64748b" }}>
             Pas encore de compte ?{" "}
-            <Link
-              href="/register"
-              className="font-semibold text-[#1c5dfd] hover:text-blue-700"
-            >
+            <Link href="/register" style={{ fontWeight: 700, color: "#1c5dfd", textDecoration: "none" }}>
               Créer un compte
             </Link>
-          </div>
+          </p>
 
-          <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-3 text-blue-700 text-sm">
-            <ShieldCheck className="w-5 h-5 flex-shrink-0 mt-0.5 text-blue-500" />
-            <p className="leading-relaxed">
-              Authentification sécurisée par JWT — session expirée
-              automatiquement après 8h
+          <div style={{
+            marginTop: "28px", background: "#eff6ff", border: "1px solid #bfdbfe",
+            borderRadius: "12px", padding: "14px 16px", display: "flex", gap: "12px", alignItems: "flex-start"
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" style={{ flexShrink: 0, marginTop: "1px" }}>
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <p style={{ fontSize: "13px", color: "#1d4ed8", lineHeight: 1.5, fontWeight: 500 }}>
+              Authentification sécurisée par JWT — session expirée automatiquement après 8h
             </p>
           </div>
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

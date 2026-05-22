@@ -139,9 +139,23 @@ export const MARK_NOTIFICATION_READ = gql`
   }
 `;
 
-export const LOGIN = gql`
+export const LOGIN_MUTATION = gql`
   mutation Login($input: LoginInput!) {
     login(input: $input) {
+      token
+      user {
+        id
+        email
+        name
+        role
+      }
+    }
+  }
+`;
+
+export const REGISTER_MUTATION = gql`
+  mutation Register($input: RegisterInput!) {
+    register(input: $input) {
       token
       user {
         id

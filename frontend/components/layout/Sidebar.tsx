@@ -1,32 +1,30 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, CarFront, Map, AlertTriangle, Bell, LogOut } from 'lucide-react';
 import styles from './Sidebar.module.css';
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userData = localStorage.getItem('user');
-    
-    if (!token && window.location.pathname !== '/login') {
-      window.location.href = '/login';
-      return;
-    }
-
-    if (userData) {
-      setUser(JSON.parse(userData));
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error(e);
+      }
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/login';
+    router.push('/login');
   };
 
   const navItems = [
@@ -36,6 +34,16 @@ export default function Sidebar() {
     { path: '/incidents', label: 'Incidents', icon: AlertTriangle },
     { path: '/notifications', label: 'Notifications', icon: Bell, badge: 3 },
   ];
+
+  const getInitials = (name: string) => {
+    if (!name) return 'U';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
 
   return (
     <aside className={styles.sidebar}>
@@ -66,12 +74,12 @@ export default function Sidebar() {
       </nav>
 
       <div className={styles.userProfile}>
-        <div className={styles.avatar}>{user ? user.name.slice(0, 2).toUpperCase() : 'MA'}</div>
+        <div className={styles.avatar}>{user ? getInitials(user.name) : 'MA'}</div>
         <div className={styles.userInfo}>
-          <span className={styles.userName}>{user ? user.name : 'Mohamed Amine'}</span>
-          <span className={styles.userRole}>{user ? user.role : 'ADMIN'}</span>
+          <span className={styles.userName}>{user ? user.name : 'Utilisateur'}</span>
+          <span className={styles.userRole}>{user ? user.role : 'OPERATOR'}</span>
         </div>
-        <button className={styles.logoutBtn} onClick={handleLogout}>
+        <button onClick={handleLogout} className={styles.logoutBtn} title="Se déconnecter">
           <LogOut size={18} />
         </button>
       </div>
