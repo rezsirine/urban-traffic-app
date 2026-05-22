@@ -123,19 +123,21 @@ export default function IncidentsPage() {
       return; // Stop execution if declaration fails
     }
 
-    // Envoyer une notification pour l'incident créé
-    try {
-      await sendNotification({
-        variables: {
-          input: {
-            title: `Nouvel incident: ${formatTitle(newIncident.type)}`,
-            message: `${newIncident.loc} - ${newIncident.desc}`,
-            userId: userId
+    // Envoyer une notification (Seulement si c'est un opérateur, pour notifier l'Admin)
+    if (userId !== 'Admin') {
+      try {
+        await sendNotification({
+          variables: {
+            input: {
+              title: `Nouvel incident: ${formatTitle(newIncident.type)}`,
+              message: `Signalé par ${userId} : ${newIncident.loc} - ${newIncident.desc}`,
+              userId: 'Admin'
+            }
           }
-        }
-      });
-    } catch (err) {
-      console.error("Error sending notification:", err);
+        });
+      } catch (err) {
+        console.error("Error sending notification:", err);
+      }
     }
 
     setIsModalOpen(false);
